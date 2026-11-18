@@ -30,7 +30,15 @@ Before installing, you need:
 - Node.js 22.23.3 and npm 10. The Node version is also in `.nvmrc`.
 - A Chromium-based browser, version 142 or newer: Chrome, Helium, Chromium,
   Brave, or Edge. It must support Chromium remote debugging.
-- Your LinkedIn account for collecting jobs.
+- LinkedIn account for collecting jobs.
+
+!!! warning
+    Using a personal LinkedIn account for automated job collection is not recommended.
+    Automated activity may violate LinkedIn's Terms of Service and trigger security
+    restrictions, temporary suspension, or permanent account bans.
+
+    Use a dedicated account or an officially supported integration where possible.
+    Never risk your primary personal LinkedIn account.
 
 Run these commands in a terminal:
 
