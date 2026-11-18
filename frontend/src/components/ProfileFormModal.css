@@ -16,6 +16,11 @@
   color: var(--text-secondary);
 }
 
+.profile-form-modal .profile-close {
+  flex: 0 0 auto;
+  width: auto;
+}
+
 .profile-form {
   display: flex;
   flex-direction: column;
@@ -60,6 +65,7 @@
 }
 
 .form-row input[type="text"],
+.form-row input[type="url"],
 .form-row input[type="number"],
 .form-row textarea {
   width: 100%;

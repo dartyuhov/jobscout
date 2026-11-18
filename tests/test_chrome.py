@@ -318,8 +318,10 @@ def test_playwright_worker_uses_selected_executable(
     assert "--remote-debugging-address=127.0.0.1" in args
 
 
+@pytest.mark.parametrize("manual_login", [False, True])
 def test_open_url_in_chrome_session_opens_new_tab_in_default_context(
     monkeypatch: pytest.MonkeyPatch,
+    manual_login: bool,
 ) -> None:
     captured: dict[str, object] = {}
 
@@ -357,7 +359,8 @@ def test_open_url_in_chrome_session_opens_new_tab_in_default_context(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
+            assert no_defaults is True
             captured["endpoint"] = endpoint
             return FakeBrowser()
 
@@ -373,10 +376,17 @@ def test_open_url_in_chrome_session_opens_new_tab_in_default_context(
             captured["exited"] = True
 
     monkeypatch.setattr(chrome, "sync_playwright", lambda: FakeManager())
+    if manual_login:
+        monkeypatch.setattr(
+            chrome,
+            "_raise_if_protection_page",
+            lambda page: pytest.fail("Manual browser opening must allow login"),
+        )
 
     open_url_in_chrome_session(
         "http://127.0.0.1:9222",
         "https://www.linkedin.com/jobs/search/?currentJobId=1",
+        manual_login=manual_login,
     )
 
     assert captured["endpoint"] == "http://127.0.0.1:9222"
@@ -386,6 +396,20 @@ def test_open_url_in_chrome_session_opens_new_tab_in_default_context(
     assert captured["brought_to_front"] is True
     assert captured["entered"] is True
     assert captured["exited"] is True
+
+
+def test_exited_child_is_not_reported_alive():
+    import subprocess
+    import time
+
+    process = subprocess.Popen(["/bin/sh", "-c", "exit 0"])
+    try:
+        deadline = time.monotonic() + 2
+        while chrome.is_process_alive(process.pid) and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert not chrome.is_process_alive(process.pid)
+    finally:
+        process.wait()
 
 
 def test_open_url_in_chrome_session_fails_when_linkedin_session_is_logged_out(
@@ -425,7 +449,7 @@ def test_open_url_in_chrome_session_fails_when_linkedin_session_is_logged_out(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -502,7 +526,7 @@ def test_get_job_ids_from_chrome_session_returns_unique_trimmed_ids(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             captured["endpoint"] = endpoint
             return FakeBrowser()
 
@@ -522,7 +546,7 @@ def test_get_job_ids_from_chrome_session_returns_unique_trimmed_ids(
 
     assert job_ids == ["101", "102", "103"]
     assert captured["endpoint"] == "http://127.0.0.1:9222"
-    assert captured["selector"] == "[data-job-id]"
+    assert captured["selector"] == chrome.JOB_ID_SELECTOR
     assert "data-job-id" in str(captured["expression"])
 
 
@@ -575,7 +599,7 @@ def test_get_job_ids_from_chrome_session_waits_for_results_page_ready(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -671,7 +695,7 @@ def test_get_job_ids_from_chrome_session_collects_across_paginated_urls(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             captured["endpoint"] = endpoint
             return FakeBrowser()
 
@@ -696,7 +720,7 @@ def test_get_job_ids_from_chrome_session_collects_across_paginated_urls(
     assert job_ids == ["1", "2", "3", "4", "5", "6", "7"]
     assert captured["endpoint"] == "http://127.0.0.1:9222"
     assert captured["visited"] == page_urls
-    assert captured["selector"] == "[data-job-id]"
+    assert captured["selector"] == chrome.JOB_ID_SELECTOR
     assert "data-job-id" in str(captured["expression"])
 
 
@@ -766,7 +790,7 @@ def test_get_job_ids_from_chrome_session_stops_when_page_has_no_jobs(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             captured["endpoint"] = endpoint
             return FakeBrowser()
 
@@ -832,7 +856,7 @@ def test_get_job_ids_from_chrome_session_fails_when_login_modal_is_visible(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -923,7 +947,7 @@ def test_parse_job_details_from_chrome_session_extracts_and_normalizes_fields(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             captured["endpoint"] = endpoint
             return FakeBrowser()
 
@@ -1034,7 +1058,7 @@ def test_parse_job_details_from_chrome_session_waits_for_job_page_ready(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -1133,7 +1157,7 @@ def test_parse_job_details_from_chrome_session_retries_page_ready_after_reload(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -1225,7 +1249,7 @@ def test_parse_job_details_from_chrome_session_sets_job_url_for_easy_apply(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -1312,7 +1336,7 @@ def test_parse_job_details_from_chrome_session_retries_until_about_is_present(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -1396,7 +1420,7 @@ def test_parse_job_details_marks_applied_when_submitted_without_apply_link(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -1474,7 +1498,7 @@ def test_parse_job_details_from_chrome_session_fails_when_opened_job_mismatches(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -1534,7 +1558,7 @@ def test_parse_job_details_from_chrome_session_stops_on_protection_page(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:
@@ -1595,7 +1619,7 @@ def test_parse_job_details_from_chrome_session_reports_logged_out_session(
         contexts = [FakeContext()]
 
     class FakeChromium:
-        def connect_over_cdp(self, endpoint: str) -> FakeBrowser:
+        def connect_over_cdp(self, endpoint: str, *, no_defaults: bool) -> FakeBrowser:
             return FakeBrowser()
 
     class FakePlaywright:

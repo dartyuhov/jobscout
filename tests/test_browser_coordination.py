@@ -89,7 +89,7 @@ def test_searches_share_healthy_app_browser_and_close_only_their_own_session(
         assert result.exit_code == 0, result.output
     assert len(launches) == 1
     assert launches[0]["chromeProfilePath"] == str(profile_path)
-    assert launches[0]["headless"] is False
+    assert launches[0]["headless"] is True
     result = runner.invoke(main, ["linkedin", "close", "--session-name", "search-one"])
     assert result.exit_code == 0, result.output
     assert closed == []

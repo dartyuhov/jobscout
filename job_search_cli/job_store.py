@@ -22,6 +22,7 @@ SOURCE_TYPE_LINKEDIN = "linkedin"
 DEFAULT_USER_STATUS = "to_be_reviewed"
 
 PROFILE_SCHEMA_COLUMNS = {
+    "searchUrl": "TEXT NOT NULL DEFAULT ''",
     "jobTitle": "TEXT NOT NULL DEFAULT ''",
     "locationGeoId": "TEXT NOT NULL DEFAULT ''",
     "f_TPR": "TEXT NOT NULL DEFAULT ''",
@@ -98,6 +99,19 @@ def upsert_profile(
     db_path: str | Path | None = None,
 ) -> int:
     """Insert or update a launch profile row and return profile id."""
+    if profile_payload.get("searchUrl"):
+        from urllib.parse import parse_qs, urlsplit
+        from job_search_cli.search_url import normalize_search_url
+
+        search_url = normalize_search_url(profile_payload["searchUrl"])
+        params = parse_qs(urlsplit(search_url).query)
+        profile_payload = dict(profile_payload) | {
+            "searchUrl": search_url,
+            "jobTitle": params.get("keywords", [""])[0],
+            "locationGeoId": params.get("geoId", ["anywhere"])[0],
+            "f_TPR": params.get("f_TPR", ["any"])[0],
+            "f_WT": params.get("f_WT", [""])[0],
+        }
     path = database_path(db_path)
     timestamp = _utc_now()
     try:
@@ -112,6 +126,13 @@ def upsert_profile(
             connection.execute(
                 f'UPDATE {PROFILE_TABLE} SET "f_WT" = ? WHERE id = ?',
                 (_coerce_profile_text(profile_payload.get("f_WT")), profile_id),
+            )
+            from job_search_cli.search_url import normalize_search_url
+
+            search_url = profile_payload.get("searchUrl", "")
+            connection.execute(
+                f'UPDATE {PROFILE_TABLE} SET "searchUrl" = ? WHERE id = ?',
+                (normalize_search_url(search_url) if search_url else "", profile_id),
             )
             return profile_id
     except (OSError, sqlite3.Error, ValueError) as exc:

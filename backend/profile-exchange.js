@@ -2,13 +2,17 @@
 const FORMAT = "job-search-settings";
 const NOTICE = "Preference text can contain personal details. Review it before sharing.";
 const DEFAULTS = {
+  searchUrl: "",
   jobTitle: "", locationGeoId: "", f_TPR: "", f_WT: "", want: "", not_want: "", maxPage: 5,
 };
 
 function exportSettings(profile) {
+  const settings = Object.fromEntries(Object.entries(DEFAULTS).map(([key, fallback]) => [key, profile[key] ?? fallback]));
+  if (settings.searchUrl) Object.assign(settings, require("./search-url").parseSearchUrl(settings.searchUrl));
+  if (!settings.searchUrl) delete settings.searchUrl;
   return {
     format: FORMAT, version: 1, notice: NOTICE,
-    settings: Object.fromEntries(Object.entries(DEFAULTS).map(([key, fallback]) => [key, profile[key] ?? fallback])),
+    settings,
   };
 }
 
@@ -34,8 +38,9 @@ function validateSettings(document) {
     settings[key] = value;
   }
   for (const key of ["locationGeoId", "f_TPR"]) {
-    if (!settings[key].trim()) throw new Error(`${key} must be a non-empty string.`);
+    if (!settings.searchUrl && !settings[key].trim()) throw new Error(`${key} must be a non-empty string.`);
   }
+  if (settings.searchUrl) Object.assign(settings, require("./search-url").parseSearchUrl(settings.searchUrl));
   return settings;
 }
 

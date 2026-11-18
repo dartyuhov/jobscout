@@ -56,6 +56,53 @@ function cleanEnv(home) {
   return env;
 }
 
+test("pasted search URLs survive save, edit, exchange and CLI pagination", async () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "search-url-"));
+  const env = { ...cleanEnv(path.join(temp, "home")), JOB_SEARCH_DATA_DIR: path.join(temp, "data") };
+  let portal;
+  try {
+    portal = await startPortal(env, temp);
+    const raw = "https://www.linkedin.com/jobs/search-results/?keywords=QA+engineer&f_E=2%2C3&f_AL=true&f_C=123&start=50&currentJobId=999&trackingId=private";
+    const response = await fetch(`${portal.url}/api/profiles`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sessionName: "URL search", searchUrl: raw }),
+    });
+    assert.equal(response.status, 201);
+    const { profile } = await response.json();
+    assert.match(profile.searchUrl, /f_E=2%2C3/);
+    assert.doesNotMatch(profile.searchUrl, /start|currentJobId|trackingId|private/);
+    assert.equal(profile.jobTitle, "QA engineer");
+    const exported = await (await fetch(`${portal.url}/api/profiles/${profile.id}/export`)).json();
+    const imported = await fetch(`${portal.url}/api/profiles/import`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(exported),
+    });
+    assert.equal(imported.status, 201);
+    assert.equal((await imported.json()).profile.searchUrl, profile.searchUrl);
+    const exchangeFile = path.join(temp, "settings.json");
+    fs.writeFileSync(exchangeFile, JSON.stringify(exported));
+    const cliImport = spawnSync(python, ["-m", "job_search_cli.cli", "profiles", "import", exchangeFile], {
+      cwd: temp, env: { ...env, PYTHONPATH: repo }, encoding: "utf8",
+    });
+    assert.equal(cliImport.status, 0, cliImport.stderr);
+    const result = spawnSync(python, ["-c", "import json; from job_search_cli.linkedin_profile import load_selected_profile; from job_search_cli.linkedin_url import build_linkedin_jobs_url; print(build_linkedin_jobs_url(load_selected_profile(profile_id=" + profile.id + "), start=25))"], {
+      cwd: temp, env: { ...env, PYTHONPATH: repo }, encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const page = new URL(result.stdout.trim());
+    assert.equal(page.searchParams.get("f_E"), "2,3");
+    assert.equal(page.searchParams.get("f_AL"), "true");
+    assert.equal(page.searchParams.get("start"), "25");
+    const invalid = await fetch(`${portal.url}/api/profiles`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sessionName: "invalid", searchUrl: "https://linkedin.com.evil.test/jobs/search/" }),
+    });
+    assert.equal(invalid.status, 400);
+  } finally {
+    if (portal) await stopPortal(portal.child);
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
+});
+
 test("portal and CLI exchange only allowlisted search settings with fresh local identities", async () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "profile-exchange-"));
   const data = path.join(temp, "private");
@@ -79,7 +126,7 @@ test("portal and CLI exchange only allowlisted search settings with fresh local 
     assert.equal(created.status, 201);
     const { profile } = await created.json();
     assert.equal(profile.chromeProfilePath, path.join(data, "chrome", "Default"));
-    assert.equal(profile.headless, false);
+    assert.equal(profile.headless, true);
     const updated = await fetch(`${portal.url}/api/profiles/${profile.id}`, {
       method: "PUT", headers: { "content-type": "application/json" },
       body: JSON.stringify({ ...profile, chromeProfilePath: "/PRIVATE-OTHER", headless: true }),
@@ -87,7 +134,7 @@ test("portal and CLI exchange only allowlisted search settings with fresh local 
     assert.equal(updated.status, 200);
     const edited = (await updated.json()).profile;
     assert.equal(edited.chromeProfilePath, profile.chromeProfilePath);
-    assert.equal(edited.headless, false);
+    assert.equal(edited.headless, true);
     const db = new Database(database);
     db.prepare("INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)").run("cv_text", "PRIVATE-CV", "now");
     db.prepare("INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)").run("ai_connection", "PRIVATE-PROVIDER-SECRET", "now");
@@ -304,7 +351,7 @@ def launch(profile):
     return chrome.ChromeLaunchResult(pid=999999, cdp_http_endpoint="http://localhost:9333", ws_endpoint="ws://localhost/test", launch_args=())
 chrome.launch_google_chrome = launch
 chrome.cleanup_chrome_processes_for_profile = lambda *a: None
-chrome.open_url_in_chrome_session = lambda *a: None
+chrome.open_url_in_chrome_session = lambda *a, **kwargs: None
 def collect(*args, **kwargs):
     Path(os.environ["JOB_SEARCH_DATA_DIR"], "collection.json").write_text(json.dumps(kwargs["page_urls"]))
     return json.loads(os.environ.get("SYNTHETIC_JOB_IDS", "[]"))
@@ -354,7 +401,7 @@ chrome.close_tracked_chrome_session = lambda *a: None
     assert.equal(fs.realpathSync(path.dirname(capture.payload_path)), fs.realpathSync(path.join(data, "runtime")));
     assert.equal(capture.payload_mode, 0o600);
     assert.equal(capture.jobTitle, "Current database title");
-    assert.equal(capture.headless, false);
+    assert.equal(capture.headless, true);
     assert.deepEqual(JSON.parse(fs.readFileSync(capture.sessions)), []);
     assert.equal((await (await fetch(`${portal.url}/api/profiles`)).json()).profiles.length, 1);
     await stopPortal(portal.child);
@@ -378,7 +425,7 @@ chrome.close_tracked_chrome_session = lambda *a: None
     assert.equal(opened.status, 200);
     assert.equal(JSON.parse(fs.readFileSync(path.join(data, "capture.json"))).headless, false);
     const afterOpen = await (await fetch(`${portal.url}/api/profiles/${profile.id}`)).json();
-    assert.equal(afterOpen.profile.headless, false);
+    assert.equal(afterOpen.profile.headless, true);
     const collected = spawnSync(python, ["-m", "job_search_cli.cli", "linkedin", "get-job-ids", "--profile-id", String(profile.id)], {
       cwd: repo,
       env: { ...env, DB_PATH: capture.db, SESSIONS_PATH: capture.sessions, SYNTHETIC_JOB_IDS: '["12345"]' },

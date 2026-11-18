@@ -140,7 +140,7 @@ def test_launch_command_creates_session_record_and_reports_endpoints(
     assert records[0].pid == 54321
     app_profile = tmp_path / "user-data/chrome/Default"
     assert records[0].chromeProfilePath == str(app_profile)
-    assert records[0].headless is False
+    assert records[0].headless is True
     assert events == [f"cleanup:{app_profile}", "launch"]
 
     profile_payload = json.loads(profile_path.read_text(encoding="utf-8"))

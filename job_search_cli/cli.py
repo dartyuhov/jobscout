@@ -317,8 +317,7 @@ def launch(
             )
             if (
                 reusable_record is not None
-                and reusable_record.headless
-                and not profile["headless"]
+                and reusable_record.headless != profile["headless"]
             ):
                 replaced_records = [
                     r for r in healthy_records if r.pid == reusable_record.pid
@@ -379,7 +378,12 @@ def launch(
                 )
                 write_session_records(healthy_records)
             save_session_record(session_record)
-            open_url_in_chrome_session(session_record.cdpHttpEndpoint, linkedin_url)
+            if headed:
+                open_url_in_chrome_session(
+                    session_record.cdpHttpEndpoint, linkedin_url, manual_login=True
+                )
+            else:
+                open_url_in_chrome_session(session_record.cdpHttpEndpoint, linkedin_url)
         except BaseException:
             if reusable_record is None:
                 close_tracked_chrome_session(session_record)

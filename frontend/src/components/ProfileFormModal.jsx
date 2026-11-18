@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import "./ProfileFormModal.css";
+import { parseSearchUrl } from "../utils/searchUrl";
 
 const EMPTY_FORM = {
+  searchUrl: "",
+  headless: false,
   sessionName: "",
   jobTitle: "",
   locationGeoId: "",
@@ -20,6 +23,8 @@ function buildFormState(profile) {
   }
 
   return {
+    searchUrl: profile.searchUrl || "",
+    headless: Boolean(profile.headless),
     sessionName: profile.sessionName || "",
     jobTitle: profile.jobTitle || "",
     locationGeoId: profile.locationGeoId || "",
@@ -92,10 +97,24 @@ export default function ProfileFormModal({
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setForm((prev) => {
+      const next = { ...prev, [name]: type === "checkbox" ? checked : value };
+      if (name === "searchUrl" && value.trim()) {
+        try {
+          const parsed = parseSearchUrl(value);
+          for (const key of ["jobTitle", "locationGeoId", "f_TPR", "f_WT"]) next[key] = parsed[key];
+        } catch { /* Validation explains incomplete URLs. */ }
+      } else if (prev.searchUrl && ["jobTitle", "locationGeoId", "f_TPR", "f_WT"].includes(name)) {
+        try {
+          const url = new URL(parseSearchUrl(prev.searchUrl).searchUrl);
+          const key = { jobTitle: "keywords", locationGeoId: "geoId", f_TPR: "f_TPR", f_WT: "f_WT" }[name];
+          if (value.trim()) url.searchParams.set(key, value.trim());
+          else url.searchParams.delete(key);
+          next.searchUrl = url.toString();
+        } catch { /* Preserve an incomplete URL. */ }
+      }
+      return next;
+    });
     // Clear field error on change
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -104,14 +123,18 @@ export default function ProfileFormModal({
 
   function validate() {
     const newErrors = {};
+    if (form.searchUrl.trim()) {
+      try { parseSearchUrl(form.searchUrl); }
+      catch (err) { newErrors.searchUrl = err.message; }
+    }
 
     if (!form.sessionName.trim()) {
-      newErrors.sessionName = "Session name is required";
+      newErrors.sessionName = "Profile name is required";
     }
-    if (!form.locationGeoId.trim()) {
+    if (!form.searchUrl.trim() && !form.locationGeoId.trim()) {
       newErrors.locationGeoId = "Location Geo ID is required";
     }
-    if (!form.f_TPR.trim()) {
+    if (!form.searchUrl.trim() && !form.f_TPR.trim()) {
       newErrors.f_TPR = "Time posted range (f_TPR) is required";
     }
 
@@ -133,6 +156,8 @@ export default function ProfileFormModal({
     }
 
     const payload = {
+      searchUrl: form.searchUrl.trim(),
+      headless: form.headless,
       sessionName: form.sessionName.trim(),
       jobTitle: form.jobTitle.trim(),
       locationGeoId: form.locationGeoId.trim(),
@@ -153,6 +178,8 @@ export default function ProfileFormModal({
     }
 
     onDuplicate({
+      searchUrl: form.searchUrl.trim(),
+      headless: form.headless,
       sessionName: form.sessionName.trim(),
       jobTitle: form.jobTitle.trim(),
       locationGeoId: form.locationGeoId.trim(),
@@ -175,7 +202,7 @@ export default function ProfileFormModal({
           <h2>{isEdit ? "Edit Profile" : "Create Profile"}</h2>
           <button
             type="button"
-            className="close-modal"
+            className="btn-cancel profile-close"
             onClick={requestClose}
             disabled={saving}
           >
@@ -185,11 +212,32 @@ export default function ProfileFormModal({
 
         <form onSubmit={handleSubmit} className="profile-form">
           <div className="form-section">
+            <h3>Paste a LinkedIn search</h3>
+            <div className="form-row">
+            <label htmlFor="searchUrl">LinkedIn Jobs search URL</label>
+            <input id="searchUrl" name="searchUrl" type="url" value={form.searchUrl}
+              onChange={handleChange} disabled={saving}
+              placeholder="https://www.linkedin.com/jobs/search/?keywords=Engineer" />
+            </div>
+            <p>Select your filters on LinkedIn, then paste the search link here.
+              Tracking and pagination are removed; search filters are preserved.</p>
+            {errors.searchUrl && <span className="field-error">{errors.searchUrl}</span>}
+            {form.searchUrl && (() => {
+              try {
+                const search = parseSearchUrl(form.searchUrl);
+                return <div aria-label="Search preview"><strong>Search filters</strong>
+                  <ul>{search.filters.map(([key, value], i) => <li key={i}>{key}: {value}</li>)}</ul>
+                  {!search.filters.length && <p>All jobs, no filters selected.</p>}
+                </div>;
+              } catch { return null; }
+            })()}
+          </div>
+          <div className="form-section">
             <h3>Required Fields</h3>
 
             <div className="form-row">
               <label htmlFor="sessionName">
-                Session Name <span className="required">*</span>
+                Profile name <span className="required">*</span>
               </label>
               <input
                 type="text"
@@ -205,7 +253,7 @@ export default function ProfileFormModal({
               )}
             </div>
 
-            <p>All searches share the app-owned visible Chrome login.</p>
+            <p>All searches share the app-owned browser login. Open Browser always opens visibly for sign-in.</p>
 
             <div className="form-row">
               <label htmlFor="locationGeoId">
@@ -247,6 +295,14 @@ export default function ProfileFormModal({
 
           <div className="form-section">
             <h3>Optional Fields</h3>
+            <div className="form-row checkbox-row">
+              <label htmlFor="headless">
+                <input id="headless" name="headless" type="checkbox" checked={form.headless}
+                  onChange={handleChange} disabled={saving} />
+                Headless — run workflows without a visible browser
+              </label>
+              <p className="section-hint">Sign in using Open Browser first. Changing mode restarts the dedicated browser and preserves its login.</p>
+            </div>
 
             <div className="form-row">
               <label htmlFor="jobTitle">Job Title</label>

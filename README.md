@@ -134,6 +134,17 @@ python -m build
 
 ## Saved search profiles
 
+Paste a LinkedIn URL into **Create Profile → LinkedIn Jobs search URL**, review
+the filter preview, enter a name, and save. The path is ignored: search
+parameters determine the saved search. Tracking and pagination are removed.
+Keywords, location, distance, sorting, and `f_*` filters are preserved. Editing
+the individual search fields updates the URL without losing other filters.
+Settings export/import preserves the normalized URL; review it before sharing.
+
+Enable **Headless** to run workflows without a visible browser. **Open Browser**
+always opens visibly for sign-in without changing the saved preference.
+Switching mode restarts the dedicated browser while preserving login data.
+
 Create and edit profiles in the portal. SQLite is the authoritative store for
 the portal, CLI, and scheduled workflows. All searches use the app-owned
 visible Chrome profile at `chrome/Default` in private application storage.

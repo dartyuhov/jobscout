@@ -16,6 +16,7 @@
   "backend/package-lock.json",
   "backend/package.json",
   "backend/profile-exchange.js",
+  "backend/search-url.js",
   "backend/runtime-paths.js",
   "backend/runtime-storage.test.js",
   "backend/scheduler.js",
@@ -72,6 +73,7 @@
   "frontend/src/styles/global.css",
   "frontend/src/theme.js",
   "frontend/src/utils/jobLinks.js",
+  "frontend/src/utils/searchUrl.js",
   "frontend/src/utils/jobLinks.test.js",
   "frontend/vite.config.js",
   "job_search_cli/__init__.py",
@@ -91,6 +93,7 @@
   "job_search_cli/profile_exchange.py",
   "job_search_cli/runtime_paths.py",
   "job_search_cli/sessions.py",
+  "job_search_cli/search_url.py",
   "scripts/bootstrap.sh",
   "scripts/export_public_source.py",
   "scripts/linkedin_full_flow.py",
@@ -121,5 +124,7 @@
   "tests/test_profile_exchange.py",
   "tests/test_public_export.py",
   "tests/test_runtime_storage.py",
-  "tests/test_sessions.py"
+  "tests/test_sessions.py",
+  "tests/test_search_url.py",
+  "tests/test_search_results_layout.py"
 ]

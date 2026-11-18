@@ -81,9 +81,7 @@ def load_selected_profile(
         )
     from job_search_cli.runtime_paths import browser_profile_path
 
-    profile.update(
-        chromeProfilePath=str(browser_profile_path()), headless=False, statePath=""
-    )
+    profile.update(chromeProfilePath=str(browser_profile_path()), statePath="")
     return normalize_launch_profile(profile, Path(f"database profile {profile['id']}"))
 
 
@@ -97,7 +95,18 @@ def normalize_launch_profile(payload: Any, path: Path) -> dict[str, Any]:
     normalized["sessionName"] = _require_text(payload, path, "sessionName")
     normalized["headless"] = _require_bool(payload, path, "headless")
 
+    if payload.get("searchUrl"):
+        from job_search_cli.search_url import normalize_search_url
+
+        try:
+            normalized["searchUrl"] = normalize_search_url(payload["searchUrl"])
+        except ValueError as exc:
+            raise ProfileLoadError(str(exc)) from exc
+
     for field_name in ("locationGeoId", "f_TPR"):
+        if normalized.get("searchUrl"):
+            normalized[field_name] = str(payload.get(field_name, ""))
+            continue
         normalized[field_name] = _require_string_value(payload, path, field_name)
 
     for field_name, default_value in OPTIONAL_DEFAULTS.items():

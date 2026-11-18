@@ -36,7 +36,7 @@ DEFAULT_REQUEST_TIMEOUT_SECONDS = 1.0
 DEFAULT_SHUTDOWN_TIMEOUT_SECONDS = 2.0
 DEFAULT_STARTUP_TIMEOUT_SECONDS = 10.0
 DEVTOOLS_VERSION_PATH = "/json/version"
-JOB_ID_SELECTOR = "[data-job-id]"
+JOB_ID_SELECTOR = '[data-job-id], [componentkey^="job-card-component-ref-"]'
 HUMAN_ACTION_MIN_WAIT_MILLISECONDS = 1_000
 HUMAN_ACTION_MAX_WAIT_MILLISECONDS = 3_000
 PAGE_READY_POLL_WAIT_MILLISECONDS = 250
@@ -346,7 +346,9 @@ def open_url_in_chrome_session(
     _ensure_node_no_deprecation_option()
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.connect_over_cdp(cdp_http_endpoint)
+            browser = playwright.chromium.connect_over_cdp(
+                cdp_http_endpoint, no_defaults=True
+            )
             if not browser.contexts:
                 raise ChromeRuntimeError(
                     f"Chrome DevTools endpoint '{cdp_http_endpoint}' did not expose "
@@ -385,7 +387,9 @@ def get_job_ids_from_chrome_session(
     _ensure_node_no_deprecation_option()
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.connect_over_cdp(cdp_http_endpoint)
+            browser = playwright.chromium.connect_over_cdp(
+                cdp_http_endpoint, no_defaults=True
+            )
             if not browser.contexts:
                 raise ChromeRuntimeError(
                     f"Chrome DevTools endpoint '{cdp_http_endpoint}' did not expose "
@@ -438,7 +442,8 @@ def get_job_ids_from_chrome_session(
 def _extract_visible_job_ids(*, page: Any, cdp_http_endpoint: str) -> list[str]:
     raw_job_ids = page.eval_on_selector_all(
         JOB_ID_SELECTOR,
-        "elements => elements.map((element) => element.getAttribute('data-job-id'))",
+        r"""elements => elements.map(element => element.getAttribute('data-job-id')
+          || (element.getAttribute('componentkey') || '').match(/^job-card-component-ref-(\d+)$/)?.[1])""",
     )
 
     if not isinstance(raw_job_ids, list):
@@ -506,7 +511,7 @@ def _scroll_job_results(page: Any) -> bool:
     payload = page.evaluate(
         """
         () => {
-          const cards = Array.from(document.querySelectorAll('[data-job-id]'));
+          const cards = Array.from(document.querySelectorAll('[data-job-id], [componentkey^="job-card-component-ref-"]'));
           let container = null;
 
           for (const card of cards) {
@@ -599,7 +604,9 @@ def parse_job_details_from_chrome_session(
 
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.connect_over_cdp(cdp_http_endpoint)
+            browser = playwright.chromium.connect_over_cdp(
+                cdp_http_endpoint, no_defaults=True
+            )
             if not browser.contexts:
                 raise ChromeRuntimeError(
                     f"Chrome DevTools endpoint '{cdp_http_endpoint}' did not expose "
@@ -1109,8 +1116,9 @@ def _is_search_results_page_ready(page: Any) -> bool:
           /* linkedin-results-ready */
           const clean = (value) => String(value || '').replace(/\s+/g, ' ').trim();
           const bodyText = clean(document.body ? document.body.innerText || '' : '');
-          const jobCount = Array.from(document.querySelectorAll('[data-job-id]'))
-            .map((element) => clean(element.getAttribute('data-job-id')))
+          const jobCount = Array.from(document.querySelectorAll('[data-job-id], [componentkey^="job-card-component-ref-"]'))
+            .map((element) => clean(element.getAttribute('data-job-id')
+              || (element.getAttribute('componentkey') || '').match(/^job-card-component-ref-(\d+)$/)?.[1]))
             .filter((value) => /^\d+$/.test(value)).length;
 
           return {
@@ -1122,7 +1130,7 @@ def _is_search_results_page_ready(page: Any) -> bool:
               document.querySelector('.scaffold-layout__list') ||
               document.querySelector('.jobs-search-two-pane__wrapper')
             ),
-            hasEmptyState: /no matching jobs found|no jobs found|there are no jobs|try broadening your search/i.test(bodyText),
+            hasEmptyState: /no matching jobs found|no jobs found|no results found|there are no jobs|try broadening your search/i.test(bodyText),
           };
         }
         """
@@ -1423,6 +1431,14 @@ def is_process_alive(pid: int) -> bool:
     """Return whether the OS still reports the process as alive."""
     if pid <= 0:
         return False
+
+    # A terminated child still answers kill(pid, 0) until its parent reaps it.
+    try:
+        exited, _ = os.waitpid(pid, os.WNOHANG)
+        if exited == pid:
+            return False
+    except (ChildProcessError, OSError):
+        pass
 
     try:
         os.kill(pid, 0)

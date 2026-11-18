@@ -13,6 +13,7 @@ from job_search_cli.runtime_paths import data_dir
 FORMAT = "job-search-settings"
 NOTICE = "Preference text can contain personal details. Review it before sharing."
 DEFAULTS = {
+    "searchUrl": "",
     "jobTitle": "",
     "locationGeoId": "",
     "f_TPR": "",
@@ -29,13 +30,14 @@ class ProfileExchangeError(ValueError):
 
 def export_settings(profile_id: int) -> dict[str, Any]:
     profile = get_profile(profile_id)
+    settings = {key: profile.get(key, default) for key, default in DEFAULTS.items()}
+    if not settings["searchUrl"]:
+        del settings["searchUrl"]
     return {
         "format": FORMAT,
         "version": 1,
         "notice": NOTICE,
-        "settings": {
-            key: profile.get(key, default) for key, default in DEFAULTS.items()
-        },
+        "settings": settings,
     }
 
 
@@ -72,6 +74,13 @@ def validate_settings(document: Any) -> dict[str, Any]:
         elif not isinstance(value, str):
             raise ProfileExchangeError(f"{key} must be a string.")
     for key in ("locationGeoId", "f_TPR"):
-        if not settings[key].strip():
+        if not settings["searchUrl"] and not settings[key].strip():
             raise ProfileExchangeError(f"{key} must be a non-empty string.")
+    if settings["searchUrl"]:
+        from job_search_cli.search_url import normalize_search_url
+
+        try:
+            settings["searchUrl"] = normalize_search_url(settings["searchUrl"])
+        except ValueError as exc:
+            raise ProfileExchangeError(str(exc)) from exc
     return settings

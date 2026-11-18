@@ -61,6 +61,7 @@ const IGNORED_COMPANIES_SETTING_KEY = "ignored_companies";
 
 const PROFILE_SELECT_FIELDS = `
   id,
+  "searchUrl",
   "sessionName",
   "chromeProfilePath",
   "jobTitle",
@@ -241,7 +242,7 @@ app.post("/api/profiles/:id/open-browser", async (req, res) => {
 });
 
 function insertProfile(validated, timestamp) {
-  return db.prepare(`INSERT INTO profile (
+  const result = db.prepare(`INSERT INTO profile (
     "sessionName", "chromeProfilePath", "jobTitle", "locationGeoId", "f_TPR", "f_WT",
     "want", "not_want", "headless", "maxPage", "statePath", "reporting", "cron", created_at, updated_at
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
@@ -249,6 +250,8 @@ function insertProfile(validated, timestamp) {
       validated.locationGeoId, validated.f_TPR, validated.f_WT, validated.want,
       validated.not_want, validated.headless ? 1 : 0, validated.maxPage,
       validated.statePath, "{}", validated.cron, timestamp, timestamp);
+  db.prepare('UPDATE profile SET "searchUrl" = ? WHERE id = ?').run(validated.searchUrl || "", result.lastInsertRowid);
+  return result;
 }
 
 app.post("/api/profiles", (req, res) => {
@@ -358,6 +361,7 @@ app.put("/api/profiles/:id", (req, res) => {
       timestamp,
       id
     );
+    db.prepare('UPDATE profile SET "searchUrl" = ? WHERE id = ?').run(validated.searchUrl || "", id);
 
     const profile = db
       .prepare(
@@ -2183,6 +2187,7 @@ function ensureSchema(database) {
     .map((row) => row.name);
 
   const profileMigrations = {
+    searchUrl: "TEXT NOT NULL DEFAULT ''",
     chromeProfilePath: "TEXT NOT NULL DEFAULT ''",
     jobTitle: "TEXT NOT NULL DEFAULT ''",
     locationGeoId: "TEXT NOT NULL DEFAULT ''",
@@ -2662,6 +2667,7 @@ function applyIgnoredCompaniesToJobs({
 
 function mapProfileRow(row) {
   return {
+    searchUrl: row.searchUrl || "",
     id: row.id,
     sessionName: row.sessionName || "",
     chromeProfilePath: row.chromeProfilePath || "",
@@ -2687,9 +2693,18 @@ function validateProfilePayload(body, { requireAll = false } = {}) {
   if (!body || typeof body !== "object") {
     throw new RequestValidationError("Request body must be a JSON object.");
   }
+  let search = { searchUrl: "" };
+  if (body.searchUrl) {
+    try { search = require("./search-url").parseSearchUrl(body.searchUrl); }
+    catch (err) { throw new RequestValidationError(err.message); }
+    body = { ...body, ...search, locationGeoId: search.locationGeoId || "anywhere", f_TPR: search.f_TPR || "any" };
+  }
 
   const errors = [];
-  const validated = { chromeProfilePath: path.join(runtimePaths.chrome, "Default"), headless: false, statePath: "" };
+  if (body.headless !== undefined && typeof body.headless !== "boolean") {
+    throw new RequestValidationError("headless must be a boolean.");
+  }
+  const validated = { searchUrl: search.searchUrl, chromeProfilePath: path.join(runtimePaths.chrome, "Default"), headless: body.headless ?? false, statePath: "" };
 
   // sessionName - required, non-empty string
   if (body.sessionName !== undefined) {

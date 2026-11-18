@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, parse_qsl, urlsplit
+
+from job_search_cli.search_url import normalize_search_url
 
 LINKEDIN_JOBS_SEARCH_URL = "https://www.linkedin.com/jobs/search/"
 LINKEDIN_RESULTS_PER_PAGE = 25
@@ -16,6 +18,13 @@ def build_linkedin_jobs_url(
     start: int | None = None,
 ) -> str:
     """Build the reproducible LinkedIn Jobs URL from a normalized profile."""
+    if profile.get("searchUrl"):
+        url = normalize_search_url(profile["searchUrl"])
+        params = parse_qsl(urlsplit(url).query, keep_blank_values=True)
+        if start is not None:
+            params.append(("start", str(start)))
+        query = urlencode(params)
+        return LINKEDIN_JOBS_SEARCH_URL + (f"?{query}" if query else "")
     query_params: list[tuple[str, str]] = [
         ("currentJobId", str(profile["currentJobId"])),
         ("f_TPR", str(profile["f_TPR"])),

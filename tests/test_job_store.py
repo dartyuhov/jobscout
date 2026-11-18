@@ -114,6 +114,7 @@ def test_upsert_profile_creates_row_and_returns_id(
         "reporting",
         "created_at",
         "updated_at",
+        "searchUrl",
     ]
     assert row is not None
     assert row[0] == 1

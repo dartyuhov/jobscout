@@ -101,6 +101,24 @@ def test_portal_downloads_settings_and_imports_independent_search(tmp_path):
             file.write_text('{"token": "PRIVATE-SECRET"', encoding="utf-8")
             page.locator('input[type="file"]').set_input_files(file)
             expect(page.get_by_role("alert")).to_have_text("Invalid JSON file.")
+            page.get_by_role("button", name="Create Profile", exact=True).click()
+            page.get_by_label("LinkedIn Jobs search URL").fill(
+                "https://www.linkedin.com/jobs/search-results/?keywords=QA&f_E=2%2C3&f_AL=true&trackingId=discard&start=50"
+            )
+            expect(page.get_by_label("Search preview")).to_contain_text("f_E: 2,3")
+            expect(page.get_by_label("Job Title", exact=True)).to_have_value("QA")
+            expect(page.get_by_label("Location Geo ID", exact=False)).to_be_visible()
+            page.get_by_label("Job Title", exact=True).fill("Backend engineer")
+            page.get_by_label("Headless", exact=False).check()
+            page.get_by_label("Profile name").fill("Pasted search")
+            page.locator('button[type="submit"]').click()
+            expect(page.get_by_role("heading", name="Create Profile")).to_have_count(0)
+            saved = page.request.get(f"{url}/api/profiles").json()["profiles"]
+            pasted = next(p for p in saved if p["sessionName"] == "Pasted search")
+            assert "f_AL=true" in pasted["searchUrl"]
+            assert "trackingId" not in pasted["searchUrl"]
+            assert pasted["headless"] is True
+            assert "keywords=Backend+engineer" in pasted["searchUrl"]
             assert not errors, errors
             browser.close()
     finally:
