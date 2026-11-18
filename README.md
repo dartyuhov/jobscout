@@ -33,12 +33,11 @@ Before installing, you need:
 - LinkedIn account for collecting jobs.
 
 > [!WARNING]
-> Using a personal LinkedIn account for automated job collection is not recommended.
+> Using a personal LinkedIn account is not recommended.
 > Automated activity may violate LinkedIn's Terms of Service and result in security
 > restrictions, temporary suspension, or permanent account bans.
 >
-> Use officially supported integrations where possible. Avoid putting your primary
-> personal LinkedIn account at risk.
+> Avoid putting your primary personal LinkedIn account at risk.
 
 Run these commands in a terminal:
 
