@@ -32,13 +32,13 @@ Before installing, you need:
   Brave, or Edge. It must support Chromium remote debugging.
 - LinkedIn account for collecting jobs.
 
-!!! warning
-    Using a personal LinkedIn account for automated job collection is not recommended.
-    Automated activity may violate LinkedIn's Terms of Service and trigger security
-    restrictions, temporary suspension, or permanent account bans.
-
-    Use a dedicated account or an officially supported integration where possible.
-    Never risk your primary personal LinkedIn account.
+> [!WARNING]
+> Using a personal LinkedIn account for automated job collection is not recommended.
+> Automated activity may violate LinkedIn's Terms of Service and result in security
+> restrictions, temporary suspension, or permanent account bans.
+>
+> Use officially supported integrations where possible. Avoid putting your primary
+> personal LinkedIn account at risk.
 
 Run these commands in a terminal:
 
