@@ -199,12 +199,21 @@ def check_backend() -> None:
 
 
 def check_chrome() -> None:
-    remedy = "Google Chrome is required (Stable 142 or newer). Install it from https://www.google.com/chrome/ in a standard location; see docs/native-setup.md. No browser was launched."
-    executable = next((p for p in chrome_candidates() if p and Path(p).is_file()), None)
+    remedy = "A Chromium browser is required (Chromium 142 or newer). Install Chrome, Helium, Chromium, Brave, or Edge, or set JOBSCOUT_BROWSER_PATH to its executable; see docs/native-setup.md. No browser was launched."
+    executable = next(
+        (
+            p
+            for p in chrome_candidates()
+            if p and Path(p).is_file() and os.access(p, os.X_OK)
+        ),
+        None,
+    )
     if not executable:
         raise SetupError(remedy)
     version = run([executable, "--version"], remedy=remedy)
-    match = re.search(r"Google Chrome (\d+)\.", version)
+    match = re.search(r"(?:Chromium|Google Chrome|Microsoft Edge)\s+(\d+)\.", version)
+    if not match:
+        match = re.search(r"(?:Helium|Brave(?: Browser)?)\s+(\d+)\.", version)
     if not match or int(match[1]) < 142:
         raise SetupError(remedy)
     print(f"Detected {version}")

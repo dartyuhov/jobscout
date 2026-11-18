@@ -199,13 +199,13 @@ def find_google_chrome_executable() -> str:
             continue
         path = Path(candidate)
         checked_paths.append(str(path))
-        if path.is_file():
+        if path.is_file() and os.access(path, os.X_OK):
             return str(path)
 
     raise ChromeRuntimeError(
-        "Google Chrome executable was not found. Checked: "
-        f"{', '.join(checked_paths)}. Install Google Chrome in a standard "
-        "location."
+        "Chromium browser executable was not found. Checked: "
+        f"{', '.join(checked_paths)}. Install Chrome, Helium, Chromium, Brave, "
+        "or Edge, or set JOBSCOUT_BROWSER_PATH to an executable."
     )
 
 
@@ -1550,7 +1550,7 @@ def _run_playwright_worker_from_argv(argv: list[str] | None = None) -> int:
         with sync_playwright() as playwright:
             context = playwright.chromium.launch_persistent_context(
                 user_data_dir=args.user_data_dir,
-                channel=PLAYWRIGHT_BROWSER_CHANNEL,
+                executable_path=find_google_chrome_executable(),
                 headless=args.headless,
                 args=launch_args,
             )

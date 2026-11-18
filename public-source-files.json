@@ -101,6 +101,7 @@
   "tests/fixtures/launch-profile.json",
   "tests/test_analyze_all.py",
   "tests/test_browser_coordination.py",
+  "tests/test_browser_executable.py",
   "tests/test_chrome.py",
   "tests/test_cli.py",
   "tests/test_compatible_ai.py",

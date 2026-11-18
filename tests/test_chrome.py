@@ -254,7 +254,7 @@ def test_cleanup_chrome_processes_for_profile_stops_only_matching_pids(
     ]
 
 
-def test_playwright_worker_uses_persistent_context_with_chrome_channel(
+def test_playwright_worker_uses_selected_executable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     captured: dict[str, object] = {}
@@ -289,6 +289,7 @@ def test_playwright_worker_uses_persistent_context_with_chrome_channel(
     monkeypatch.setattr(chrome.threading, "Event", lambda: FakeEvent())
     monkeypatch.setattr(chrome.signal, "signal", lambda sig, handler: None)
     monkeypatch.setattr(chrome, "sync_playwright", lambda: FakeManager())
+    monkeypatch.setattr(chrome, "find_google_chrome_executable", lambda: "/test/helium")
 
     exit_code = chrome._run_playwright_worker_from_argv(
         [
@@ -307,7 +308,8 @@ def test_playwright_worker_uses_persistent_context_with_chrome_channel(
     launch_kwargs = captured["launch_kwargs"]
     assert isinstance(launch_kwargs, dict)
     assert launch_kwargs["user_data_dir"] == "/tmp/chrome-user-data"
-    assert launch_kwargs["channel"] == chrome.PLAYWRIGHT_BROWSER_CHANNEL
+    assert launch_kwargs["executable_path"] == "/test/helium"
+    assert "channel" not in launch_kwargs
     assert launch_kwargs["headless"] is True
     args = launch_kwargs["args"]
     assert isinstance(args, list)

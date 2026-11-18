@@ -45,7 +45,11 @@ Browser operations queue across processes, including scheduled and CLI runs.
 
 - Python 3.11 (native setup; tested with 3.11.6)
 - Node.js 22.23.3 and npm 10 (native SQLite requires a matching Node ABI)
-- Google Chrome Stable 142 or newer installed
+- A Chromium-based browser with Chromium 142 or newer installed: Chrome,
+  Helium, Chromium, Brave, or Edge. Standard locations are detected automatically.
+  Set `JOBSCOUT_BROWSER_PATH` to an executable path to choose another installation;
+  use the same setting during bootstrap, start, and CLI operations. Browser forks
+  must support Chromium remote debugging; compatibility is checked at launch.
 
 For native installation, run `bash scripts/bootstrap.sh`, then
 `bash scripts/start.sh`. Open `http://127.0.0.1:3000` and create your first

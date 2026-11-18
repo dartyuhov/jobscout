@@ -87,6 +87,7 @@ def installation(tmp_path: Path):
         "PATH": f"{tools}:{os.environ['PATH']}",
         "PYTHON": str(tools / "python3.11"),
         "HOME": str(tmp_path / "home"),
+        "JOBSCOUT_BROWSER_PATH": str(chrome),
         "JOB_SEARCH_DATA_DIR": str(tmp_path / "private"),
         "COMMAND_LOG": str(log),
         "PYTHONDONTWRITEBYTECODE": "1",
@@ -202,8 +203,8 @@ def test_missing_chrome_is_actionable_without_launching_browser(installation):
     _, _, log, run = installation
     result = run(FAKE_CHROME_MISSING="1")
     assert result.returncode != 0
-    assert "Google Chrome is required" in result.stderr
-    assert "google.com/chrome" in result.stderr
+    assert "Chromium browser is required" in result.stderr
+    assert "JOBSCOUT_BROWSER_PATH" in result.stderr
     commands = [json.loads(line) for line in log.read_text().splitlines()]
     assert not any(entry[1] == ["ci"] for entry in commands)
 
@@ -235,7 +236,7 @@ def test_missing_python_and_old_chrome_explain_remediation(installation):
     assert "python.org" in result.stderr
     result = run(FAKE_CHROME_VERSION="Google Chrome 120.0.0.0")
     assert result.returncode != 0
-    assert "Stable 142 or newer" in result.stderr
+    assert "Chromium 142 or newer" in result.stderr
     assert not (source / ".venv").exists()
 
 

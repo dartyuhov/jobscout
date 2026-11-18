@@ -9,13 +9,20 @@ import sys
 
 
 def chrome_candidates() -> tuple[str | None, ...]:
+    override = os.environ.get("JOBSCOUT_BROWSER_PATH")
+    if override:
+        return (str(Path(override).expanduser()),)
     if sys.platform == "darwin":
-        return (
-            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-            str(
-                Path.home()
-                / "Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-            ),
+        return tuple(
+            str(root / app / "Contents/MacOS" / executable)
+            for root in (Path("/Applications"), Path.home() / "Applications")
+            for app, executable in (
+                ("Google Chrome.app", "Google Chrome"),
+                ("Helium.app", "Helium"),
+                ("Chromium.app", "Chromium"),
+                ("Brave Browser.app", "Brave Browser"),
+                ("Microsoft Edge.app", "Microsoft Edge"),
+            )
         )
     if os.name == "nt":
         return tuple(
@@ -29,6 +36,11 @@ def chrome_candidates() -> tuple[str | None, ...]:
     return (
         shutil.which("google-chrome"),
         shutil.which("google-chrome-stable"),
+        shutil.which("helium"),
+        shutil.which("chromium"),
+        shutil.which("chromium-browser"),
+        shutil.which("brave-browser"),
+        shutil.which("microsoft-edge"),
         "/usr/bin/google-chrome",
         "/usr/bin/google-chrome-stable",
         "/opt/google/chrome/google-chrome",
