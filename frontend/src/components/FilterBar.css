@@ -1,0 +1,206 @@
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.filter-field {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-field:nth-of-type(4),
+.filter-field:nth-of-type(5) {
+  grid-column: span 2;
+}
+
+.search-field {
+  grid-column: span 6;
+}
+
+.filter-field span,
+.status-fieldset legend,
+.filter-actions span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.filter-field input,
+.filter-field select,
+.filter-actions select {
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  min-height: 39px;
+  padding: 6px 10px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.status-fieldset {
+  grid-column: span 8;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  margin: 0;
+  padding: 5px 8px 8px;
+  align-self: end;
+}
+
+.status-options {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.filter-status-pill {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 4px 12px 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  font-size: 0.72rem;
+  line-height: 1;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.filter-status-pill input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex: 0 0 16px;
+  border: 2px solid var(--text-faint);
+  border-radius: 4px;
+  background: var(--panel-bg-strong);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.filter-status-pill input::before {
+  content: "";
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid var(--text-inverse);
+  border-bottom: 2px solid var(--text-inverse);
+  transform: rotate(-45deg) scale(0);
+  transform-origin: center;
+  transition: transform 120ms ease-in-out;
+}
+
+.filter-status-pill input:checked {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.filter-status-pill input:checked::before {
+  transform: rotate(-45deg) scale(1);
+}
+
+.filter-status-pill-label {
+  display: inline-block;
+  margin: 0;
+  line-height: 1;
+}
+
+.status-want {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+}
+
+.status-to_be_reviewed {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
+}
+
+.status-rejected {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+}
+
+.status-applied {
+  background: var(--info-bg);
+  border-color: var(--info-border);
+}
+
+.status-not_suitable {
+  background: var(--special-bg);
+  border-color: var(--special-border);
+}
+
+.status-not_available {
+  background: var(--neutral-bg);
+  border-color: var(--neutral-border);
+}
+
+.filter-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.filter-actions-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.match-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.match-toggle input {
+  accent-color: var(--brand);
+}
+
+.rows-control {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.rows-control span {
+  margin-right: 8px;
+}
+
+.clear-button {
+  border: 1px solid var(--border-strong);
+  background: var(--panel-bg-muted);
+  color: var(--text-secondary);
+  border-radius: 10px;
+  min-height: 39px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .search-field,
+  .status-fieldset,
+  .filter-actions,
+  .filter-field {
+    grid-column: span 12;
+  }
+
+  .filter-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .filter-actions-left,
+  .rows-control {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}

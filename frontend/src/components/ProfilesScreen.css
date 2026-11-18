@@ -1,0 +1,117 @@
+.profiles-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profiles-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profiles-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+}
+
+.profiles-subtitle {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.profiles-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profiles-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.profiles-toggle input {
+  accent-color: var(--brand);
+}
+
+.btn-upload,
+.btn-create {
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.btn-upload {
+  background: var(--panel-bg-muted);
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.btn-upload:hover:not(:disabled) {
+  background: var(--panel-bg-hover);
+}
+
+.btn-create {
+  background: var(--brand);
+  border-color: var(--brand-strong);
+  color: var(--text-inverse);
+}
+
+.btn-create:hover:not(:disabled) {
+  background: var(--brand-strong);
+}
+
+.btn-upload:disabled,
+.btn-create:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profiles-error {
+  margin: 0;
+  padding: 12px;
+  background: var(--danger-bg-strong);
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  color: var(--danger-text);
+  font-size: 0.9rem;
+}
+
+.profiles-success {
+  margin: 0;
+  padding: 12px;
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-border);
+  border-radius: 8px;
+  color: var(--brand-strong);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .profiles-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profiles-actions {
+    justify-content: stretch;
+  }
+
+  .btn-upload,
+  .btn-create {
+    flex: 1;
+  }
+}

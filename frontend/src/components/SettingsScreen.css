@@ -1,0 +1,326 @@
+.settings-screen {
+  padding: 0 0.5rem;
+}
+
+.ai-connection-settings fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.ai-connection-settings label {
+  display: block;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.ai-connection-settings input {
+  width: 100%;
+  min-height: 44px;
+}
+
+.ai-connection-settings .settings-section-actions {
+  flex-wrap: wrap;
+}
+
+.ai-connection-settings button {
+  min-height: 44px;
+}
+
+.settings-screen h2 {
+  margin-bottom: 0.5rem;
+}
+
+.settings-description {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.settings-section {
+  background: var(--panel-bg-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.settings-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settings-section-description-compact {
+  margin-bottom: 0;
+}
+
+.section-description,
+.settings-helper-text,
+.settings-toggle-note,
+.char-count {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.section-description,
+.settings-helper-text {
+  margin-bottom: 1rem;
+}
+
+.theme-option-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.theme-option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: var(--panel-bg);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.theme-option-card:hover {
+  border-color: var(--brand-border);
+  background: var(--panel-bg-strong);
+  transform: translateY(-1px);
+}
+
+.theme-option-card.selected {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand-soft) 60%, var(--panel-bg));
+}
+
+.theme-option-card input {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2rem;
+  accent-color: var(--brand);
+  flex: 0 0 auto;
+}
+
+.theme-option-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.theme-option-copy strong {
+  color: var(--text-primary);
+}
+
+.theme-option-copy span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.settings-toggle-row input {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  accent-color: var(--brand);
+}
+
+.settings-toggle-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 400;
+}
+
+.chrome-profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.chrome-profile-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--panel-bg);
+}
+
+.chrome-profile-copy {
+  min-width: 0;
+}
+
+.chrome-profile-heading-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.chrome-profile-heading-row strong {
+  word-break: break-all;
+}
+
+.chrome-profile-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  background: var(--panel-bg-strong);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chrome-profile-status.is-active {
+  background: color-mix(in srgb, var(--warning-bg, #f59e0b) 18%, var(--panel-bg));
+  color: var(--warning-text, #92400e);
+}
+
+.chrome-profile-meta {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.secondary-button {
+  border: 1px solid var(--border-soft);
+  background: var(--panel-bg-strong);
+  color: var(--text-primary);
+  padding: 0.625rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.secondary-button:hover:not(:disabled) {
+  border-color: var(--brand-border);
+  background: color-mix(in srgb, var(--brand-soft) 35%, var(--panel-bg-strong));
+}
+
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settings-textarea {
+  width: 100%;
+  padding: 1rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  resize: vertical;
+}
+
+.cv-textarea {
+  min-height: 400px;
+}
+
+.settings-textarea-compact {
+  min-height: 180px;
+}
+
+.settings-textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--input-focus-ring);
+}
+
+.settings-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--input-bg-disabled);
+}
+
+.settings-textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.save-button {
+  background: var(--brand);
+  color: var(--text-inverse);
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.save-button:hover:not(:disabled) {
+  background: var(--brand-strong);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success-banner {
+  background: var(--success-bg-strong);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .theme-option-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-section-header,
+  .settings-section-actions,
+  .chrome-profile-card,
+  .settings-toggle-row,
+  .settings-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .secondary-button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "format": "job-search-settings",
+  "version": 1,
+  "notice": "Synthetic example. Review preference text before sharing settings.",
+  "settings": {
+    "jobTitle": "Software Engineer",
+    "locationGeoId": "92000000",
+    "f_TPR": "r604800",
+    "f_WT": "2",
+    "want": "",
+    "not_want": "",
+    "maxPage": 1
+  }
+}

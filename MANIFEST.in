@@ -1,0 +1,59 @@
+# Reset setuptools automatic discovery: source distributions use the same list.
+global-exclude *
+include .gitignore .nvmrc LICENSE MANIFEST.in README.md THIRD_PARTY_NOTICES.md
+include pyproject.toml public-source-files.json
+include backend/ai-client.js backend/ai-generation.test.js backend/ai-jobs.js
+include backend/ai-readiness.js backend/ai-settings.js backend/ai-settings.test.js
+include backend/profile-exchange.js backend/runtime-paths.js
+include backend/runtime-storage.test.js backend/scheduler.js
+include backend/scheduler.test.js backend/server.js backend/server.test.js
+include backend/package.json backend/package-lock.json
+include frontend/index.html frontend/package.json frontend/package-lock.json
+include frontend/vite.config.js
+include frontend/src/App.css frontend/src/App.jsx frontend/src/aiReadiness.js
+include frontend/src/api/jobs.js frontend/src/constants.js frontend/src/main.jsx
+include frontend/src/styles/global.css frontend/src/theme.js
+include frontend/src/utils/jobLinks.js frontend/src/utils/jobLinks.test.js
+include frontend/src/components/AiConnectionSettings.jsx
+include frontend/src/components/AskAiScreen.css frontend/src/components/AskAiScreen.jsx
+include frontend/src/components/CronInput.css frontend/src/components/CronInput.jsx
+include frontend/src/components/CvRequiredModal.css frontend/src/components/CvRequiredModal.jsx
+include frontend/src/components/DeleteConfirmModal.css frontend/src/components/DeleteConfirmModal.jsx
+include frontend/src/components/FilterBar.css frontend/src/components/FilterBar.jsx
+include frontend/src/components/JobModal.css frontend/src/components/JobModal.jsx
+include frontend/src/components/JobsTable.css frontend/src/components/JobsTable.jsx
+include frontend/src/components/ProfileFormModal.css frontend/src/components/ProfileFormModal.jsx
+include frontend/src/components/ProfilesScreen.css frontend/src/components/ProfilesScreen.jsx
+include frontend/src/components/ProfilesTable.css frontend/src/components/ProfilesTable.jsx
+include frontend/src/components/RunHistory.css frontend/src/components/RunHistory.jsx
+include frontend/src/components/RunWorkflowScreen.css frontend/src/components/RunWorkflowScreen.jsx
+include frontend/src/components/SettingsScreen.css frontend/src/components/SettingsScreen.jsx
+include frontend/src/components/StatusDropdown.css frontend/src/components/StatusDropdown.jsx
+include frontend/src/components/TabNav.css frontend/src/components/TabNav.jsx
+include frontend/src/components/WorkflowBatchNotifier.jsx
+include frontend/src/components/WorkflowProgress.css frontend/src/components/WorkflowProgress.jsx
+include job_search_cli/__init__.py job_search_cli/ai-prompts.json
+include job_search_cli/ai_client.py job_search_cli/ai_readiness.py
+include job_search_cli/browser_coordination.py job_search_cli/chrome.py
+include job_search_cli/chrome_executable.py job_search_cli/cli.py
+include job_search_cli/job_store.py job_search_cli/linkedin_full_flow.py
+include job_search_cli/linkedin_job.py job_search_cli/linkedin_profile.py
+include job_search_cli/linkedin_url.py job_search_cli/portal.py
+include job_search_cli/profile_exchange.py job_search_cli/runtime_paths.py
+include job_search_cli/sessions.py
+include scripts/bootstrap.sh scripts/start.sh scripts/native.py
+include scripts/linkedin_full_flow.py scripts/startup-errors.cjs
+include scripts/export_public_source.py
+include tests/conftest.py tests/fixtures/launch-profile.json
+include tests/test_analyze_all.py tests/test_browser_coordination.py
+include tests/test_chrome.py tests/test_cli.py tests/test_compatible_ai.py
+include tests/test_database_profiles.py tests/test_job_store.py
+include tests/test_linkedin_close.py tests/test_linkedin_full_flow.py
+include tests/test_linkedin_get_job_ids.py tests/test_linkedin_launch.py
+include tests/test_linkedin_parse_job.py tests/test_linkedin_profile.py
+include tests/test_native_scripts.py tests/test_native_smoke.py
+include tests/test_portal_ai_generation.py tests/test_portal_no_ai.py
+include tests/test_portal_profile_exchange.py tests/test_profile_exchange.py
+include tests/test_public_export.py tests/test_runtime_storage.py tests/test_sessions.py
+include docs/native-setup.md docs/ai-instruction-provenance.md
+include docs/public-source-export.md examples/search-settings.json

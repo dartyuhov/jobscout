@@ -1,0 +1,70 @@
+.cv-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.cv-modal-panel {
+  background: var(--panel-bg-strong);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-elevated);
+}
+
+.cv-modal-panel h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.cv-modal-panel p {
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.cv-modal-hint {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.cv-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.cv-modal-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.cv-modal-secondary:hover {
+  background: var(--panel-bg-soft);
+}
+
+.cv-modal-primary {
+  background: var(--brand);
+  color: var(--text-inverse);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.cv-modal-primary:hover {
+  background: var(--brand-strong);
+}

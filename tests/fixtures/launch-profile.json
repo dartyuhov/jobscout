@@ -1,0 +1,8 @@
+{
+  "sessionName": "synthetic-search",
+  "chromeProfilePath": "/tmp/synthetic-chrome/Default",
+  "headless": false,
+  "locationGeoId": "92000000",
+  "f_TPR": "r604800",
+  "jobTitle": "Software Engineer"
+}

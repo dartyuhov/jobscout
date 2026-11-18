@@ -1,0 +1,169 @@
+.run-history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.run-history h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.history-loading,
+.history-empty {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.history-table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.history-table th,
+.history-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-muted);
+}
+
+.history-table th {
+  background: var(--panel-bg-soft);
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.history-table td {
+  color: var(--text-secondary);
+}
+
+.history-table tr:hover {
+  background: var(--panel-bg-soft);
+}
+
+.history-table tr.current-row {
+  background: var(--table-selected-bg);
+}
+
+.history-table tr.current-row:hover {
+  background: var(--table-selected-hover);
+}
+
+.col-id {
+  width: 60px;
+  font-weight: 600;
+}
+
+.col-profile {
+  min-width: 120px;
+}
+
+.col-status {
+  width: 100px;
+}
+
+.col-source {
+  width: 90px;
+}
+
+.col-jobs,
+.col-matched,
+.col-parsed {
+  width: 90px;
+  text-align: center;
+}
+
+.col-started {
+  min-width: 150px;
+}
+
+.col-actions {
+  width: 80px;
+}
+
+.status-pill,
+.source-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
+
+.status-pill {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.source-badge {
+  font-weight: 500;
+}
+
+.status-pill.pending,
+.status-pill.running {
+  background: var(--info-bg-strong);
+  color: var(--info-text);
+}
+
+.status-pill.completed {
+  background: var(--success-bg-strong);
+  color: var(--success-text);
+}
+
+.status-pill.failed,
+.status-pill.interrupted {
+  background: var(--danger-bg-strong);
+  color: var(--danger-text);
+}
+
+.status-pill.cancelled,
+.source-badge.manual {
+  background: var(--neutral-bg-strong);
+  color: var(--neutral-text);
+}
+
+.status-pill.queued,
+.source-badge.scheduled {
+  background: var(--warning-bg-strong);
+  color: var(--warning-text);
+}
+
+.btn-view {
+  padding: 5px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--panel-bg-muted);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-view:hover {
+  background: var(--panel-bg-hover);
+}
+
+@media (max-width: 768px) {
+  .history-table {
+    font-size: 0.85rem;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 8px 10px;
+  }
+
+  .col-started {
+    display: none;
+  }
+}

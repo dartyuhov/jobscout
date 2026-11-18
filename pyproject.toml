@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "job-search-cli"
+version = "0.1.0"
+description = "CLI tooling for job search workflows."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+authors = [{name = "Dzmitry Artsiukhou"}]
+dependencies = [
+  "click>=8.1,<9",
+  "playwright>=1.52,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2",
+  "pytest>=8.3,<9",
+  "ruff==0.15.5",
+]
+
+[project.scripts]
+job-search = "job_search_cli.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.setuptools.packages.find]
+include = ["job_search_cli*"]
+
+[tool.setuptools.package-data]
+job_search_cli = ["ai-prompts.json"]

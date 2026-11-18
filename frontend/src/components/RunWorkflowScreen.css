@@ -1,0 +1,310 @@
+.run-workflow-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.run-workflow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.run-workflow-header h2,
+.run-workflow-controls h3,
+.batch-run-section h4,
+.schedule-section-header h4,
+.scheduled-profile-name,
+.select-all-label,
+.profile-label,
+.control-row label {
+  color: var(--text-secondary);
+}
+
+.run-workflow-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.run-workflow-subtitle,
+.control-hint,
+.batch-run-hint,
+.drag-handle,
+.profile-order,
+.profile-next-run,
+.scheduled-profile-next-run {
+  color: var(--text-faint);
+}
+
+.run-workflow-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+.run-workflow-error {
+  margin: 0;
+  padding: 12px;
+  background: var(--danger-bg-strong);
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  color: var(--danger-text);
+  font-size: 0.9rem;
+}
+
+.run-workflow-controls,
+.schedule-section,
+.scheduled-profiles-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.control-row label {
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.control-row select {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 8px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.control-row select:disabled {
+  background: var(--input-bg-disabled);
+  cursor: not-allowed;
+}
+
+.btn-start,
+.btn-clear-schedule,
+.btn-toggle-schedule,
+.btn-run-selected,
+.btn-run-all {
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.btn-start,
+.btn-toggle-schedule,
+.btn-run-selected {
+  border: 1px solid var(--brand-strong);
+  background: var(--brand);
+  color: var(--text-inverse);
+}
+
+.btn-start:hover:not(:disabled),
+.btn-toggle-schedule:hover:not(:disabled),
+.btn-run-selected:hover:not(:disabled) {
+  background: var(--brand-strong);
+}
+
+.btn-clear-schedule,
+.btn-run-all {
+  border: 1px solid var(--border-strong);
+  background: var(--panel-bg-strong);
+  color: var(--text-secondary);
+}
+
+.btn-clear-schedule:hover:not(:disabled),
+.btn-run-all:hover:not(:disabled) {
+  background: var(--panel-bg-muted);
+}
+
+.btn-start:disabled,
+.btn-clear-schedule:disabled,
+.btn-run-selected:disabled,
+.btn-run-all:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .control-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .control-row select {
+    max-width: none;
+  }
+
+  .btn-start,
+  .btn-run-selected,
+  .btn-run-all,
+  .btn-clear-schedule {
+    width: 100%;
+  }
+}
+
+.batch-run-section,
+.progress-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-muted);
+}
+
+.batch-run-section h4,
+.schedule-section-header h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.profile-selection {
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  background: var(--panel-bg-soft);
+  margin-bottom: 12px;
+}
+
+.profile-selection-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-muted);
+  background: var(--panel-bg-strong);
+  border-radius: 8px 8px 0 0;
+}
+
+.select-all-label,
+.profile-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.select-all-label input[type="checkbox"],
+.profile-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brand);
+}
+
+.profile-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.profile-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-muted);
+  background: var(--panel-bg-strong);
+  cursor: grab;
+  transition: background 0.15s ease;
+}
+
+.profile-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.profile-item:hover {
+  background: var(--panel-bg-soft);
+}
+
+.profile-item.dragging {
+  opacity: 0.5;
+  background: var(--table-selected-bg);
+}
+
+.profile-schedule-chip,
+.schedule-summary-chip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.profile-schedule-chip {
+  margin-left: auto;
+}
+
+.schedule-section {
+  padding: 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--panel-bg-soft);
+  margin-bottom: 12px;
+}
+
+.schedule-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.schedule-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.schedule-summary-chip {
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.scheduled-profiles-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.scheduled-profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--panel-bg-strong);
+}
+
+.scheduled-profile-card code {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.batch-run-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .batch-run-buttons,
+  .schedule-section-header {
+    flex-direction: column;
+  }
+
+  .profile-item {
+    flex-wrap: wrap;
+  }
+}
