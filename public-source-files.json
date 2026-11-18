@@ -1,6 +1,7 @@
 [
   ".gitignore",
   ".nvmrc",
+  "AGENTS.md",
   "LICENSE",
   "MANIFEST.in",
   "README.md",
@@ -26,6 +27,9 @@
   "docs/ai-instruction-provenance.md",
   "docs/native-setup.md",
   "docs/public-source-export.md",
+  "docs/screenshots/jobs.png",
+  "docs/screenshots/profiles.png",
+  "docs/screenshots/workflows.png",
   "examples/search-settings.json",
   "frontend/index.html",
   "frontend/package-lock.json",

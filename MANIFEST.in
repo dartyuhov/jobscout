@@ -2,6 +2,9 @@
 global-exclude *
 include .gitignore .nvmrc LICENSE MANIFEST.in README.md THIRD_PARTY_NOTICES.md
 include pyproject.toml public-source-files.json
+include AGENTS.md
+include docs/screenshots/jobs.png docs/screenshots/profiles.png
+include docs/screenshots/workflows.png
 include backend/ai-client.js backend/ai-generation.test.js backend/ai-jobs.js
 include backend/ai-readiness.js backend/ai-settings.js backend/ai-settings.test.js
 include backend/profile-exchange.js backend/runtime-paths.js

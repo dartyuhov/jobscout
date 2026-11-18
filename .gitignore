@@ -32,6 +32,8 @@ logs/
 runtime/
 state/
 screenshots/
+!docs/screenshots/
+!docs/screenshots/*.png
 snapshots/
 config.*.json
 !tests/fixtures/*.json

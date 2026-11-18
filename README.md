@@ -1,18 +1,38 @@
 # JobScout
 
-Local portal and CLI for LinkedIn collection, job review, and optional AI.
+JobScout collects LinkedIn job listings into a local portal where you can read
+descriptions, keep a shortlist, and track applications. Save a few searches,
+sign in to LinkedIn once in the dedicated browser, and run them when you want
+fresh results.
 
-## Public preview
+Optional AI features explain requirements, check jobs against your exclusions,
+draft cover letters, and help with application questions. You choose the AI
+provider. Collecting and reviewing jobs works without one.
 
-JobScout is available for early testing. Automated checks pass, but real
-Chrome/LinkedIn workflows on macOS and Ubuntu desktop still need verification.
-Frontend build dependencies have an unresolved Picomatch advisory,
-[GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf).
-This is a source preview, not a fully verified stable release.
+![JobScout jobs portal with search filters and collected listings](docs/screenshots/jobs.png)
 
-## Quick start
+<p>
+  <img src="docs/screenshots/profiles.png" width="49%" alt="Saved search profiles with browser, edit, archive, and export actions">
+  <img src="docs/screenshots/workflows.png" width="49%" alt="Workflow screen with selected searches and scheduling controls">
+</p>
 
-Install the prerequisites listed below, then run:
+*Screenshots use fictional jobs and sample searches.*
+
+## Install and open the portal
+
+JobScout runs on your computer. The native setup targets macOS and Ubuntu
+24.04 desktop; see [native setup](docs/native-setup.md) for the tested versions
+and remaining desktop checks. This is an early preview.
+
+Before installing, you need:
+
+- Python 3.11 with `venv` support.
+- Node.js 22.23.3 and npm 10. The Node version is also in `.nvmrc`.
+- A Chromium-based browser, version 142 or newer: Chrome, Helium, Chromium,
+  Brave, or Edge. It must support Chromium remote debugging.
+- Your LinkedIn account for collecting jobs.
+
+Run these commands in a terminal:
 
 ```bash
 git clone https://github.com/dartyuhov/jobscout.git
@@ -21,396 +41,338 @@ bash scripts/bootstrap.sh
 bash scripts/start.sh
 ```
 
-Open `http://127.0.0.1:3000`. Your jobs, CV, settings, and dedicated Chrome
-session stay in private application storage outside this checkout. AI is
-optional and disabled until you configure and test a connection in Settings.
+Open [the local portal](http://127.0.0.1:3000). Keep the terminal running while
+you use it. Press **Ctrl+C** there to stop the app; run
+`bash scripts/start.sh` again next time.
 
-Project source is [MIT licensed](LICENSE), copyright Dzmitry Artsiukhou.
-See [third-party notices](THIRD_PARTY_NOTICES.md) for dependency licenses and
-[source export](docs/public-source-export.md) for the reviewed release boundary.
+Bootstrap installs dependencies and builds the portal. Rerunning it preserves
+your saved jobs, settings, and browser login. If your browser isn't detected,
+set `JOBSCOUT_BROWSER_PATH` to its executable path before bootstrap and keep
+that setting when starting the app or using the CLI.
 
-## What this tool does
+## Create your first search profile
 
-`job-search` gives you a full workflow for one profile:
+A search profile is a saved LinkedIn search: its filters, page count, and your
+preferences. You can have separate profiles for different roles or locations,
+such as “Python remote” and “Backend Berlin.”
 
-1. Launch (or reuse) a Chrome session for LinkedIn Jobs.
-2. Collect LinkedIn job IDs from search result pages.
-3. Parse detailed job data for selected IDs.
-4. Close only the session you used.
-5. Review stored jobs in the portal, with AI features optional.
+1. Open LinkedIn Jobs and set the keywords, location, and filters you want.
+2. Copy the search URL from the address bar.
+3. In JobScout, open **Profiles**, then **Create Profile**.
+4. Paste the link into **LinkedIn Jobs search URL**. Check the filter preview.
+5. Enter a **Profile name** you'll recognize later.
+6. Set **Max Pages**, the number of search-result pages to collect. The default
+   is five; use a smaller number for your first run.
+7. Optionally fill in **Want** and **Not Want**, then select **Create Profile**.
 
-Browser operations queue across processes, including scheduled and CLI runs.
+Pasting a search link fills in fields such as **Job Title**, **Location Geo ID**,
+**Time Posted Range (f_TPR)**, and **Work Type (f_WT)**. You don't need to look
+up those LinkedIn codes yourself. Other search filters in the link are kept;
+tracking and pagination parameters are removed.
 
-## Requirements
+Use **Want** to record what you're looking for, and **Not Want** for exclusions
+such as “internships, unpaid roles, mandatory relocation.” Current AI job
+analysis uses **Not Want** and the job details. It doesn't score jobs against
+**Want** or your CV.
 
-- Python 3.11 (native setup; tested with 3.11.6)
-- Node.js 22.23.3 and npm 10 (native SQLite requires a matching Node ABI)
-- A Chromium-based browser with Chromium 142 or newer installed: Chrome,
-  Helium, Chromium, Brave, or Edge. Standard locations are detected automatically.
-  Set `JOBSCOUT_BROWSER_PATH` to an executable path to choose another installation;
-  use the same setting during bootstrap, start, and CLI operations. Browser forks
-  must support Chromium remote debugging; compatibility is checked at launch.
+Keep **Headless** off until you've signed in and completed a successful run.
+You can enable it later to collect without a visible browser window.
 
-For native installation, run `bash scripts/bootstrap.sh`, then
-`bash scripts/start.sh`. Open `http://127.0.0.1:3000` and create your first
-search profile. See [native setup](docs/native-setup.md) for the exact target
-matrix, prerequisite instructions, storage locations, and verification limits.
+## Sign in to LinkedIn
 
-Collection, parsing, and review work without AI credentials. Configure and test
-an optional AI connection in **Settings** to enable analysis, summaries, cover
-letters, and Ask AI. The app calls your chosen compatible API directly.
+JobScout uses one dedicated browser profile for all your searches. That browser
+profile holds your LinkedIn login. A saved search profile doesn't create a
+separate LinkedIn account or browser identity.
 
-## AI connection settings
+1. In **Profiles**, select **Open Browser** beside your saved search.
+2. In the browser window that opens, sign in to LinkedIn.
+3. Complete any two-factor authentication or account checks yourself.
+4. Confirm you can see LinkedIn Jobs, then return to the portal.
 
-You can verify a hosted or local OpenAI-compatible text-generation endpoint:
+Your login stays in JobScout's private browser storage when you close the
+window or restart the app. Your everyday browser profile isn't copied or
+modified. You don't enter your LinkedIn password into the portal.
 
-1. Open **Settings** and enter **AI base URL** and **AI model**.
-2. Enter **AI token (optional)** if your provider requires authentication.
-3. Select **Save AI connection**, then **Test saved connection**.
+All searches use whichever LinkedIn account is signed in to that dedicated
+browser. To change accounts, open it again, sign out of LinkedIn, and sign in
+with the other account. Changing the account affects every search profile.
 
-Enter the full API base URL, including its path prefix. For example,
-`https://api.openai.com/v1` sends requests to
-`https://api.openai.com/v1/chat/completions`. A local server might use
-`http://localhost:1234/v1`. The app appends `/chat/completions` to the base URL;
-it doesn't add `/v1` or accept a complete completions endpoint instead of a
-base URL. Trailing slashes are ignored. URL credentials, query parameters,
-and fragments aren't accepted. Use the token field for credentials.
+**Open Browser** always opens a visible window, even for a headless search.
+Changing a search's headless setting restarts the dedicated browser while
+preserving its login. Browser work takes turns across manual runs, schedules,
+and the CLI, so an action may wait for the current one to finish.
 
-The supported subset follows the official
-[Chat Completions API](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create):
-HTTP POST with JSON `model`, text `messages` (`role` and `content`), and
-`stream: false`. A successful reply must contain nonempty text in
-`choices[0].message.content` with `finish_reason: "stop"`. Tool calls,
-function calls, refusals, incomplete replies, and non-JSON responses don't
-verify generation capability. No tools or provider-specific options are sent.
-When a token is saved, requests use `Authorization: Bearer <token>`; without
-one, the authorization header is omitted. Requests time out after 30 seconds
-and don't follow redirects. Provider response bodies aren't included in errors.
+## Collect jobs
 
-Testing sends only a short synthetic prompt, not jobs or CV text, and can incur
-provider charges. Feature requests send their required context to your chosen
-provider. A liveness check or model listing doesn't establish readiness.
-Changing the endpoint, model, or token requires another explicit successful
-test. Saving or testing doesn't enable automatic analysis or summaries.
+Use **Run Workflow** to collect listings from one search or a batch of searches.
 
-Analysis sends the selected job and exclusion preferences. Summaries send the
-job description and company/position labels. Cover letters also send your saved
-CV. Ask AI sends bounded conversation history and selected job context; it adds
-CV text for CV, application-answer, or explicit personal-fit questions. These
-features generate text without tools, shell access, or model-triggered actions.
-See [AI instruction provenance](docs/ai-instruction-provenance.md) for the
-application-owned prompt sources and retained behavior.
+1. Open **Run Workflow** and check the profiles you want to run. All profiles
+   are selected initially.
+2. Drag profiles into the order you want.
+3. Select **Run Selected**.
+4. Watch the progress and open entries in **Run History** for results and logs.
+5. Open **Jobs** when collection finishes.
 
-The token persists **unencrypted in your private backend SQLite database**.
-Database backups contain the token. The frontend receives only token presence,
-never the saved value. Leave the token input blank to keep it, enter a new
-value to replace it, or select **Remove saved token** to remove it. Tokens
-aren't saved in browser storage. Treat your database and its backups as private.
+Each workflow opens the saved search, collects job IDs, reads the individual
+job pages, and closes its tracked browser session. Searches in a batch run
+sequentially. A failed job page doesn't stop the remaining pages from being
+parsed; check the run details for failures.
 
-## Development setup
+AI stages are skipped until you've configured AI and enabled automatic
+processing. A run can collect jobs successfully with AI skipped.
 
-For normal installation, use the native bootstrap above. For Python development,
-create an environment and install the development dependencies:
+If LinkedIn asks you to sign in again or complete a challenge, use
+**Profiles → Open Browser** to resolve it, then retry the run. Use the cancel
+control in the run's progress panel when you need to stop an active run.
+
+### Schedule searches
+
+Schedules run through the local app, so keep JobScout running and your
+computer awake for the scheduled time.
+
+1. In **Run Workflow**, select the profiles to schedule.
+2. Select **Show scheduling** and choose a schedule or enter a cron expression.
+3. Review the upcoming run times, then select **Save Schedule for Selected**.
+
+For example, `0 9 * * 1-5` runs at 9:00 a.m. on weekdays in the backend
+computer's local time zone. The scheduling panel lists active schedules and
+the next run. Select profiles and use **Clear Schedule for Selected** to
+remove their schedules.
+
+## Review jobs and track applications
+
+The **Jobs** screen is your review queue. It starts with jobs marked
+**to be reviewed**, including jobs that haven't had any AI analysis.
+
+- Search by job ID, company, or position. Narrow results by profile, location,
+  date, or status, and select column headings to sort.
+- Select **View** in the **Description** column to open a job. Expand
+  **About this role** to read the full description.
+- Use the status menu to mark a job **want**, **applied**, **rejected**,
+  **not suitable**, or **not available**.
+- In job details, **Applied** marks the job as applied and moves to the next
+  result. **Skip** marks it as not suitable and moves on.
+- Use the left and right arrows to move between jobs on the current page.
+  The keyboard arrow keys work too; **Escape** closes the details.
+
+**Open Job** opens the LinkedIn listing, or the saved application link when
+there's no LinkedIn job ID. Complete the application on that site, then
+mark it **applied** in JobScout. Marking a status doesn't submit an application.
+Links open in your regular browser, which may have a different LinkedIn login
+from JobScout's dedicated collection browser.
+
+If a job disappears after you change its status, select that status in the
+filters to see it again. **Clear filters** returns to the default review queue.
+Leave **Show only AI-matched jobs** unchecked to include unanalyzed jobs.
+
+## Set up optional AI
+
+AI calls go directly from JobScout to the provider you configure. You can use
+a hosted or local OpenAI-compatible Chat Completions endpoint.
+
+1. Open **Settings** and find **AI connection**.
+2. Enter **AI base URL**, including the API path. For example,
+   `https://api.openai.com/v1` or `http://localhost:1234/v1` for a local server.
+3. Enter the provider's model identifier in **AI model**.
+4. Enter **AI token (optional)** if the provider requires one.
+5. Select **Save AI connection**, then **Test saved connection**.
+6. Wait for **AI connection verified** before using AI features.
+
+JobScout adds `/chat/completions` to the base URL. Don't enter the complete
+completions endpoint or put credentials in the URL. Retest after changing the
+URL, model, or token. The test sends a short sample prompt, without jobs or CV
+text, and may incur provider charges.
+
+The token is stored unencrypted in your private backend database, including
+its backups. The saved value isn't returned to the browser. Leave the token
+field blank to keep it, enter a new value to replace it, or use
+**Remove saved token** to delete it.
+
+### Analyze, summarize, and draft cover letters
+
+Open a job's details to use these actions after verifying your AI connection:
+
+| Action | What you get | Context sent to your provider |
+| --- | --- | --- |
+| **Analyze Job** | A match decision and reasoning based on exclusions | Job details and the search profile's **Not Want** text |
+| **Summarize** | Must-haves, nice-to-haves, company details, and application type | Job description, company, and position |
+| **Cover Letter** | A cover letter downloaded as a text file | Saved CV and job context |
+| **Ask AI** | A conversation with that job attached | Your messages and selected job context; CV context when needed |
+
+For cover letters, first paste your CV into **Settings → CV / Resume Text**
+and select **Save Settings**. Read and edit the downloaded letter before using
+it. You can still read previously saved summaries and reasoning when AI isn't
+configured.
+
+To process jobs automatically, enable either option under
+**Settings → Automatic AI processing**:
+
+- **Automatically analyze collected jobs** runs analysis during collection.
+- **Automatically summarize matched jobs (including existing matches)** also
+  processes saved matches that don't have summaries yet.
+
+Both start off. Saving or testing a connection leaves them off. Enabling them
+permits recurring provider requests and possible charges. Neither automatic
+feature sends your CV.
+
+### Use Ask AI
+
+Open **Ask AI** for job-search questions, or open it from a job to attach that
+listing. Use the job search in the screen to attach a different saved job.
+
+Choose **General**, **Job Analysis**, **CV Review**, or **Application Answer**.
+For example, use **Application Answer** and paste an employer's question, or
+ask **Job Analysis** which requirements need more explanation. CV review and
+application answers require a saved CV. For personal-fit questions in other
+modes, select the option to include CV context.
+
+Messages and the required job or CV context go to your selected provider.
+Changing the attached job clears the conversation after confirmation. Copy
+answers you want to keep before leaving the screen; the chat isn't a saved
+conversation history. AI produces text and doesn't apply for jobs or control
+your browser.
+
+## Manage searches and portal settings
+
+Use **Profiles** to maintain searches and **Settings** for preferences shared
+across the portal.
+
+- **Edit or duplicate a search:** select **Edit** beside a profile. Update it,
+  or use **Duplicate**, give the copy a name, and save it as a new profile.
+- **Archive a search:** select **Archive** to remove it from active workflows
+  while keeping jobs and run history. Enable **Show archived** and select
+  **Restore** to use it again.
+- **Share search settings:** select **Export settings** to download
+  `search-settings.json`. Use **Import settings JSON** to create a new local
+  profile. Each import creates a separate search with no schedule; it doesn't
+  update an existing one. Exports include search filters, page count, and
+  preference text, which you need to review for personal details. They omit
+  your CV, jobs, credentials, browser login, and generated content. You can try
+  [the sample settings file](examples/search-settings.json).
+- **Ignore companies:** in **Settings → Ignored Companies**, enter one exact
+  company name per line and select **Save Settings**. Matching ignores case
+  and surrounding spaces. Matching jobs in the review queue are marked
+  **not suitable**.
+- **Change appearance:** choose **System**, **Light**, or **Dark** in
+  **Settings → Appearance**, then select **Save Settings** to keep it.
+- **Get completion notifications:** enable **Browser system notifications**
+  in Settings and allow browser notifications when prompted. Keep the portal
+  open to receive a notification when a whole workflow batch finishes.
+
+If JobScout's browser gets stuck, open **Settings → Chrome Profiles** and
+select **Check Active Status**. **Kill** cleans up the selected configured
+browser profile; **Kill All Active** cleans up all active configured profiles.
+Cleanup also cancels runs using those profiles. Use it when you intend to stop
+that browser work.
+
+## Where your data lives
+
+Jobs, search profiles, CV text, generated content, settings, and workflow logs
+stay in local application storage outside the checkout. AI features send the
+context described above to your provider; collection connects to LinkedIn.
+
+| System | Default storage folder |
+| --- | --- |
+| macOS | `~/Library/Application Support/job-search/` |
+| Ubuntu | `$XDG_DATA_HOME/job-search/`, or `~/.local/share/job-search/` when unset |
+
+The folder contains `linkedin_jobs.sqlite3`, persistent browser data in
+`chrome/Default`, tracked sessions in `sessions.json`, and run reports in
+`logs/`. Treat backups as private: they can contain your CV, browser login,
+and saved AI token.
+
+Set `JOB_SEARCH_DATA_DIR` to use another storage folder. `DB_PATH` and
+`SESSIONS_PATH` override the individual database and session files. Keep the
+same environment settings for the portal and CLI, and use absolute paths.
+Runtime storage must be outside the checkout. See
+[private storage details](docs/native-setup.md#private-storage) for setup.
+
+## CLI workflow
+
+Use the CLI when you want to run searches from a terminal. After bootstrap,
+activate the environment and find the ID of a search created in the portal:
 
 ```bash
-python3.11 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e '.[dev]'
-```
-
-## Verify install
-
-With development dependencies installed, run the Python checks below. Run
-`node --test` in `backend` and `npm run build` in `frontend` for portal checks.
-
-```bash
-job-search --help
-ruff check .
-ruff format --check .
-python -m pytest
-python -m build
-```
-
-## Saved search profiles
-
-Paste a LinkedIn URL into **Create Profile → LinkedIn Jobs search URL**, review
-the filter preview, enter a name, and save. The path is ignored: search
-parameters determine the saved search. Tracking and pagination are removed.
-Keywords, location, distance, sorting, and `f_*` filters are preserved. Editing
-the individual search fields updates the URL without losing other filters.
-Settings export/import preserves the normalized URL; review it before sharing.
-
-Enable **Headless** to run workflows without a visible browser. **Open Browser**
-always opens visibly for sign-in without changing the saved preference.
-Switching mode restarts the dedicated browser while preserving login data.
-
-Create and edit profiles in the portal. SQLite is the authoritative store for
-the portal, CLI, and scheduled workflows. All searches use the app-owned
-visible Chrome profile at `chrome/Default` in private application storage.
-
-Inspect profiles and select their local IDs from the CLI:
-
-```bash
 job-search profiles list
 job-search profiles show 1
+```
+
+Run a complete collection for that saved profile, replacing `1` with its ID:
+
+```bash
+python scripts/linkedin_full_flow.py --profile-id 1 --repo "$(pwd)"
+```
+
+The script collects IDs, parses jobs sequentially, and closes its tracked
+session. It uses the same AI settings and automatic-processing opt-ins as the
+portal. Exit codes are `0` for success, `2` for partial parsing failure, and `1`
+for fatal failure. Reports go into the private `logs/` folder.
+
+For manual browser login from the terminal, run `job-search linkedin login`
+and press Enter when you've finished signing in. For individual collection
+steps, use these commands with your own profile ID, job ID, and session name
+from `profiles list`:
+
+```bash
 job-search linkedin launch --profile-id 1
+job-search linkedin get-job-ids --profile-id 1
+job-search linkedin parse-job JOB_ID --profile-id 1
+job-search linkedin close --session-name "Python remote"
 ```
 
-All profile-based commands and the full-flow script accept `--profile-id ID`.
-Use the same `DB_PATH` or root `--db-path` selection as the portal. IDs belong
-to that database. Missing profiles report the selected database and how to list
-profiles; archived profiles must be restored in the portal before running.
-Select exactly one of `--profile-id` and the legacy `--profile` option.
+Individual browser commands take turns, but another request can run between
+them. Use the full-flow script to keep the collection together. Closing by
+session name targets that session; `close --all` closes every tracked session.
+All processes must use the same `JOB_SEARCH_DATA_DIR` for browser coordination.
 
-For compatibility, `--profile PATH` reads only an existing local `id`, or a
-`sessionName` when the file has no ID. It loads current settings from SQLite;
-it never imports settings, updates the database from JSON, or writes an ID back
-to the file. Use explicit settings import to create a new profile from portable
-JSON.
-
-### Import and export search settings
-
-In **Profiles**, select **Export settings** on a profile to download
-`search-settings.json`. Select **Import settings JSON** to create a new local
-profile from that file. You can also exchange settings through the CLI:
-
-```bash
-job-search --db-path /path/to/selected.sqlite3 profiles export 1 > search-settings.json
-job-search --db-path /path/to/selected.sqlite3 profiles import search-settings.json
-```
-
-Exports contain only the search title, location, time and work-type filters,
-page count, and `want` / `not_want` preference text. **Preference text can contain
-personal details. Review it before sharing.** The exchange does not include CV
-text, jobs, conversations, generated content, provider credentials, reporting
-destinations, machine paths, browser/session identities, local database IDs,
-schedules, or runtime tuning.
-
-Each import creates a new database ID and session name, uses app-owned Chrome
-storage, and starts with visible Chrome and no schedule. Importing the same file
-again creates another independent profile; it doesn't update an existing one.
-Unknown fields, including excluded runtime fields, are ignored. Invalid types,
-missing required filters, and unsupported versions are rejected without creating
-a profile. Existing runtime profile JSON isn't an exchange document.
-
-The version 1 contract is a JSON object with `format: "job-search-settings"`,
-`version: 1`, a personal-text `notice`, and a `settings` object. Its allowlist is
-`jobTitle`, `locationGeoId`, `f_TPR`, `f_WT`, `want`, `not_want`, and `maxPage`.
-All fields except `maxPage` are strings; `locationGeoId` and `f_TPR` must be
-nonempty. `maxPage` is a positive 32-bit integer and defaults to 5; optional text
-defaults to an empty string. Preference text is preserved verbatim.
-
-The portal API serves downloads at `GET /api/profiles/:id/export` and accepts
-the JSON document at `POST /api/profiles/import`. The file-upload endpoint,
-`POST /api/profiles/upload` (multipart field `file`), uses the same contract.
-
-Portal launch payloads live temporarily in private `runtime/` storage with mode
-`0600` and are removed after execution. They select saved database records and
-are not editable profile authorities. **Open Browser** and CLI browser
-operations use the dedicated visible Chrome profile.
-
-## Dedicated Chrome login
-
-Prepare the shared browser location, then open a visible window for manual login:
-
-```bash
-job-search linkedin prepare-browser
-job-search linkedin login
-```
-
-Sign in and complete account challenges yourself. Return to the terminal and
-press Enter when finished. Closing this window preserves cookies and browser
-data under `chrome/Default` in private application storage. New searches use
-this same login. No everyday Chrome profile is registered, copied, or modified.
-Saved legacy browser paths are not used; preparation does not copy or migrate
-your everyday Chrome data.
-
-Login holds browser ownership until you finish. Portal **Open Browser**, CLI
-launch/get/parse/close/cleanup commands, and scheduled workflows take turns.
-Use the full-flow script when you need launch through targeted close to run
-without another request navigating between individual commands. All processes
-must use the same `JOB_SEARCH_DATA_DIR` to share coordination. The lock file
-remains in `runtime/browser.lock`; the OS releases ownership on process exit.
-Don't delete it while the app is running.
-
-Healthy app-owned sessions can be reused by several searches. Targeted close
-removes only the selected session and keeps Chrome alive while another tracked
-session references it. A failed new launch navigation closes only its new
-browser. After an interrupted workflow, the next request can reuse a healthy
-tracked browser or clean up processes belonging to the configured profile.
-
-For manual desktop verification on macOS and Ubuntu, use an isolated
-`JOB_SEARCH_DATA_DIR` and your own account. Run login, restart the app, create
-two searches with the default browser path, and verify both retain login.
-Run collection alongside a scheduled search and verify they take turns. Close
-the target session and verify an unrelated Chrome window stays open. Automated
-tests use browser substitutes; they don't establish real desktop login support.
-
-## Full LinkedIn flow (multi-session safe)
-
-Select a saved profile and its session name from `profiles list`:
-
-```bash
-export PROFILE_ID=1
-export SESSION_NAME=your-saved-session-name
-```
-
-Run the full flow:
-
-```bash
-job-search linkedin launch --profile-id "$PROFILE_ID"
-job-search linkedin get-job-ids --profile-id "$PROFILE_ID"
-job-search linkedin parse-job <job-id> --profile-id "$PROFILE_ID"
-job-search linkedin close --session-name "$SESSION_NAME"
-```
-
-Notes:
-
-- Use `parse-job` repeatedly for each ID you want to enrich before analysis.
-- `analyze-all` and `summarize-all` require a verified AI connection and explain
-  setup requirements before attempting any AI connection.
-- For parallel workflows, do not use `close --all` unless you intentionally want to terminate every tracked session.
-
-## Automated full flow script (sequential parse)
-
-Use the orchestrator script to collect and parse jobs automatically:
-
-```bash
-.venv/bin/python scripts/linkedin_full_flow.py \
-  --profile-id "$PROFILE_ID" \
-  --repo "$(pwd)"
-```
-
-Behavior:
-
-- Parses jobs sequentially (no multi-tab parallel parsing).
-- Continues on individual `parse-job` failures and reports failed IDs.
-- Always closes by `--session-name` from the profile when launch succeeded.
-- Skips AI analysis and summaries when AI is unconfigured. Both the terminal
-  summary and saved report explain skipped stages; absent AI setup is not a
-  collection failure.
-- Automatic analysis and summaries default to off, with separate opt-ins. A
-  verified connection alone must not enable background AI work.
-
-Exit codes:
-
-- `0`: collection success (including runs with AI skipped)
-- `2`: partial success (`parse-job` failures happened)
-- `1`: fatal failure in launch/get-job-ids/close/analyze step
-
-## Useful outputs and files
-
-Runtime data defaults to private per-user storage, independent of your working
-directory:
-
-- macOS: `~/Library/Application Support/job-search/`
-- Ubuntu: `$XDG_DATA_HOME/job-search/`, or `~/.local/share/job-search/` when
-  `XDG_DATA_HOME` is unset or relative.
-
-The storage root contains these runtime locations:
-
-- `sessions.json`: tracked Chrome sessions.
-- `linkedin_jobs.sqlite3`: profiles, jobs, settings, CV text, generated content,
-  and workflow output logs.
-- `logs/`: full-flow JSON reports, including command output.
-- `runtime/`: temporary workflow launch payloads, removed when work finishes.
-- `chrome/`: persistent app-owned browser storage shared by searches.
-
-Fresh storage starts without profiles, jobs, CV text, or imported sessions.
-Checkout-local databases and sessions are never discovered, copied, or migrated
-automatically. Keep your existing private installation and its data separately.
-New runtime directories use mode `0700`; databases, session files, reports, and
-launch payloads use `0600`. Existing parent directories retain their permissions.
-
-Set `JOB_SEARCH_DATA_DIR` to override the storage root. Set `DB_PATH` and
-`SESSIONS_PATH` to select individual files. Use absolute environment paths when
-running separate commands from different directories. Relative overrides resolve
-against the invoking process's working directory and are passed to children as
-absolute paths. Portal actions, scheduled runs, and full-flow subprocesses use
-the same resolved selection.
-
-You can select a database for any CLI command with the root `--db-path` option:
-
-```bash
-job-search --db-path /absolute/path/jobs.sqlite3 linkedin get-job-ids \
-  --profile-id "$PROFILE_ID"
-job-search --db-path /absolute/path/jobs.sqlite3 portal serve --no-browser
-```
-
-The existing `linkedin launch --db-path` and `portal serve --db-path` options
-remain available and override the root selection for that command. The full-flow
-script also accepts `--db-path`; without `--report-path`, it writes to `logs/`
-in the user storage root. A database override selects the database only; sessions
-still use `SESSIONS_PATH` or the storage root. Backups of the database contain
-your private settings and content.
-
-Source and command outputs include:
-
-- `frontend/`: React SPA for browsing jobs and applying
-- `backend/`: Express API that reads/writes `linkedin_jobs.sqlite3`
-- CLI output:
-  - `launch` prints `Created` or `Reused` and CDP endpoints
-  - `get-job-ids` prints a JSON array of IDs
-  - `parse-job` confirms parsed job ID
-  - `close --session-name` confirms only that session was closed
-  - `analyze-all` prints per-job decision and final total
+Use `job-search --help` and `job-search linkedin --help` for command options.
+To select another database, put `--db-path /absolute/path/jobs.sqlite3` before
+the subcommand. Profile IDs belong to the selected database. Restore archived
+profiles in the portal before running them.
 
 ## Troubleshooting
 
-- `Tracked LinkedIn session '<name>' was not found.`
-  - Run `job-search linkedin launch --profile ...` first.
-  - Confirm `sessionName` in profile matches the active tracked session.
+Start with the failed run's details in **Run Workflow** for collection errors.
 
-- Missing or invalid profile ID
-  - Create a profile in the portal and run `job-search profiles list`.
-  - Use its local ID with `--profile-id`; launching doesn't rewrite JSON files.
+| Problem | What to try |
+| --- | --- |
+| No jobs in the review queue | Check run results, selected profiles, status filters, and the AI-matched toggle. **Clear filters** restores the default review queue. |
+| LinkedIn login or account challenge | Open **Profiles → Open Browser**, complete the check, then retry. |
+| Browser won't start or stays locked | Check the browser executable and version. Inspect **Settings → Chrome Profiles** and clean up stuck JobScout browser work. |
+| AI buttons are disabled | Save and test the connection in **Settings**. Retest after changing its URL, model, or token. |
+| Cover letter or CV review needs a CV | Paste plain text into **Settings → CV / Resume Text** and select **Save Settings**. |
+| AI analysis or summaries fail with invalid output | These features need a model that follows the requested JSON format. Check the model and retry. A successful connection test only verifies text generation. |
+| Portal won't start | Check [native setup troubleshooting](docs/native-setup.md#troubleshooting). For another port, run `PORT=3001 bash scripts/start.sh`. |
 
-- Chrome profile lock/start failure
-  - Use a dedicated Chrome profile directory for automation.
-  - Close other Chrome processes using the same profile path.
+## Development
 
-- `AI_NOT_READY` or `AI is not configured`
-  - Continue collecting, parsing, and reviewing jobs without AI.
-  - Open **Settings**, save an AI base URL and model, and select
-    **Test saved connection**. Retest after changing the endpoint, model, or token.
-
-## Portal (SPA)
-
-Bootstrap installs Node dependencies and builds the frontend. To refresh them
-manually, run `npm ci` in each Node package and build the frontend:
+For code changes, read [AGENTS.md](AGENTS.md) for repository-specific guidance.
+Install Python development dependencies after bootstrap:
 
 ```bash
-cd backend && npm ci
-cd ../frontend && npm ci && npm run build
-cd ..
+source .venv/bin/activate
+python -m pip install -e '.[dev]'
 ```
 
-Serve the portal locally from CLI:
+Run checks relevant to your changes from the repository root:
 
 ```bash
-job-search portal serve
+ruff check .
+ruff format --check .
+python -m pytest
+node --test backend/*.test.js
+node --test frontend/src/utils/*.test.js
+npm --prefix frontend run build
+python -m build
 ```
 
-The command starts the backend, serves the built frontend (if available), and
-opens `http://127.0.0.1:3000` in your browser.
+See [native setup](docs/native-setup.md) for installation verification,
+[AI instruction provenance](docs/ai-instruction-provenance.md) for prompt
+sources, and [public source export](docs/public-source-export.md) for preparing
+release contents.
 
-The portal starts without AI and makes no startup AI requests. AI generation
-controls are disabled with setup guidance, while job descriptions, status
-changes, and existing generated content remain available. Fresh filter defaults
-show unanalyzed jobs instead of requiring an AI match.
+## License
 
-Useful options:
-
-```bash
-job-search portal serve --port 3100
-job-search portal serve --db-path /absolute/path/to/linkedin_jobs.sqlite3
-job-search portal serve --no-browser
-```
-
-## Installation scope
-
-Use the native macOS or Ubuntu desktop setup for the first release. See the
-[verification matrix](docs/native-setup.md#runtime-and-desktop-matrix) for the
-tested runtime versions and remaining desktop checks. The public export is
-native source only; it omits obsolete container files.
+JobScout is [MIT licensed](LICENSE), copyright Dzmitry Artsiukhou. See
+[third-party notices](THIRD_PARTY_NOTICES.md) for dependency licenses.
